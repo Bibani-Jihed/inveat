@@ -24,28 +24,11 @@ class _NavigationState extends State<Navigation> {
   );
 
   @override
-  void initState() {
-    super.initState();
-    currentIndex = 0;
-  }
-
-  void changePage(int index) {
-    setState(() {
-      currentIndex = index;
-    });
-  }
-  void bottomTapped(int index) {
-    setState(() {
-      changePage(index);
-      _controller.animateToPage(index, duration: Duration(milliseconds: 500), curve: Curves.ease);
-    });
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
+
   Widget buildPageView() {
     return PageView(
       controller: _controller,
@@ -58,11 +41,12 @@ class _NavigationState extends State<Navigation> {
       ],
     );
   }
-  @override
-  Widget build(BuildContext context) {
 
-    return Scaffold(
-      bottomNavigationBar: BubbleBottomBar(
+  Widget _buildBottombar(BuildContext context) {
+    return Container(
+      color: mColors.black,
+      padding: const EdgeInsets.only(left: 0.0,right: 120.0),
+      child: BubbleBottomBar(
         backgroundColor: mColors.black,
         opacity: 1,
         currentIndex: currentIndex,
@@ -77,74 +61,84 @@ class _NavigationState extends State<Navigation> {
         //new
         hasInk: false,
         //new, gives a cute ink effect
-        inkColor: Colors.white,
+        inkColor: Colors.yellow,
         //optional, uses theme color if not specified
         items: <BubbleBottomBarItem>[
           BubbleBottomBarItem(
-
-              backgroundColor: Colors.white,
-              icon: Icon(
-                Icons.dashboard,
-                color: Colors.white,
-              ),
-              activeIcon: Icon(
-                Icons.dashboard,
-                color: mColors.black,
-              ),
-              title: Text(
-                'Feed',
-                style: GoogleFonts.nunito(
-                    color: mColors.black,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 18.0
-                ),
-              ),
-          ),
-          BubbleBottomBarItem(
-              backgroundColor: Colors.white,
-              icon: Icon(
-                Icons.menu,
-                color: Colors.white,
-              ),
-              activeIcon: Icon(
-                Icons.menu,
-                color: mColors.black,
-              ),
-              title: Text(
-                'Profile',
-                style: GoogleFonts.nunito(
+            backgroundColor: Colors.yellow,
+            icon: Icon(
+              Icons.dashboard,
+              color: Colors.yellow,
+            ),
+            activeIcon: Icon(
+              Icons.dashboard,
+              color: mColors.black,
+            ),
+            title: Text(
+              'Feed',
+              style: GoogleFonts.nunito(
                   color: mColors.black,
                   fontWeight: FontWeight.w900,
-                  fontSize: 18.0
-                ),
-              ),
+                  fontSize: 18.0),
+            ),
           ),
-         /* BubbleBottomBarItem(
-              backgroundColor: Colors.indigo,
-              icon: Icon(
-                Icons.folder_open,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.folder_open,
-                color: Colors.indigo,
-              ),
-              title: Text("Folders")),
           BubbleBottomBarItem(
-              backgroundColor: Colors.green,
-              icon: Icon(
-                Icons.menu,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.menu,
-                color: Colors.green,
-              ),
-              title: Text("Menu"))*/
+            backgroundColor: Colors.yellow,
+            icon: Icon(
+              Icons.menu,
+              color: Colors.yellow,
+            ),
+            activeIcon: Icon(
+              Icons.menu,
+              color: mColors.black,
+            ),
+            title: Text(
+              'Profile',
+              style: GoogleFonts.nunito(
+                  color: mColors.black,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 18.0),
+            ),
+          ),
         ],
-
       ),
-      body: buildPageView()
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    currentIndex = 0;
+  }
+
+  void changePage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+  }
+
+  void bottomTapped(int index) {
+    setState(() {
+      changePage(index);
+      _controller.animateToPage(index,
+          duration: Duration(milliseconds: 500), curve: Curves.ease);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: <Widget>[
+          buildPageView(),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _buildBottombar(context),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:inveat/views/navigation.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/views/login_screen.dart';
 import 'package:inveat/views/welcome_screen.dart';
@@ -11,8 +12,12 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return MaterialApp(
       title: 'Inveat',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
