@@ -6,8 +6,8 @@ import 'package:video_player/video_player.dart';
 
 class StoryScreen extends StatefulWidget {
   final List<Story> stories;
-
-  const StoryScreen({@required this.stories});
+  final User user;
+  const StoryScreen({@required this.stories, @required this.user});
 
   @override
   _StoryScreenState createState() => _StoryScreenState();
@@ -128,7 +128,7 @@ class _StoryScreenState extends State<StoryScreen>
                               horizontal: 1.5,
                               vertical: 10.0,
                             ),
-                            child: UserInfo(user: story.user),
+                            child: UserInfo(user: widget.user),
                           ),
                         ],
                       ),
@@ -294,7 +294,7 @@ class UserInfo extends StatelessWidget {
         const SizedBox(width: 10.0),
         Expanded(
           child: Text(
-            user.name,
+            user.first_name,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18.0,

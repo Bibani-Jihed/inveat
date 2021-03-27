@@ -1,10 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/views/login_screen.dart';
-import 'package:lottie/lottie.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/constants/colors.dart' as mColors;
-import 'package:inveat/utilities/constants/strings.dart' as Strings;
 
 class Welcome extends StatefulWidget{
   @override
@@ -18,7 +16,7 @@ class _WelcomeState extends State<Welcome> {
       height: 70.0,
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Login()),
           );
@@ -26,14 +24,14 @@ class _WelcomeState extends State<Welcome> {
         child: Text(
           'CONTINUE',
           style: GoogleFonts.nunito(
-            color: mColors.mc_start,
+            color: MColors.mc_start,
             fontSize: 20.0,
             fontWeight: FontWeight.w900,
           ),
         ),
         style: ElevatedButton.styleFrom(
           primary: Colors.white,
-          onPrimary: mColors.mc_start,
+          onPrimary: MColors.mc_start,
           shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
         ),
       ),
@@ -49,7 +47,7 @@ class _WelcomeState extends State<Welcome> {
            height: double.infinity,
            width: double.infinity,
             decoration: BoxDecoration(
-              color: mColors.black,
+              color: MColors.black,
             ),
           ),
           Container(
@@ -58,7 +56,7 @@ class _WelcomeState extends State<Welcome> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Lottie.asset('assets/jsons/food.json'),
+                //Lottie.asset('assets/jsons/food.json'),
                 SizedBox(height: 30.0,),
                 Align(
                   alignment: Alignment.center,

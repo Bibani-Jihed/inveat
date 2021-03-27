@@ -1,14 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:inveat/views/login_screen.dart';
-import 'package:inveat/views/pages/home.dart';
-import 'package:inveat/views/pages/profile.dart';
-import 'package:inveat/views/signup_screen.dart';
-import 'package:inveat/views/welcome_screen.dart';
-import 'package:lottie/lottie.dart';
+import 'package:inveat/views/pages/home_page.dart';
+import 'package:inveat/views/pages/current_user_profile_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
-import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/constants/colors.dart'
+import 'package:inveat/lib/utilities/constants/colors.dart'
     as mColors;
 import 'package:inveat/utilities/constants/strings.dart' as Strings;
 
@@ -128,17 +124,24 @@ class _NavigationState extends State<Navigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          buildPageView(),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: _buildBottombar(context),
-          ),
-        ],
-      ),
+      body:
+      new GestureDetector(
+        onTap: (){
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: Stack(
+          children: <Widget>[
+            buildPageView(),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildBottombar(context),
+            ),
+          ],
+        ),
+      )
+
     );
   }
 }

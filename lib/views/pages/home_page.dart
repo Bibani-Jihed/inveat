@@ -1,19 +1,16 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_button/insta/insta_love_button.dart';
 import 'package:flutter_button/insta/story_button.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
-import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/constants/colors.dart'
-    as mColors;
-import 'package:inveat/utilities/constants/strings.dart' as Strings;
-import 'package:inveat/views/pages/story.dart';
-import 'package:inveat/views/welcome_screen.dart';
+import 'package:inveat/lib/utilities/constants/colors.dart' as mColors;
+import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/views/story_screen.dart';
 import 'package:like_button/like_button.dart';
 import 'package:pinch_zoom_image_last/pinch_zoom_image_last.dart';
-import 'package:inveat/views/data.dart';
+import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/data.dart';
+import 'package:inveat/data/post_service.dart' as PostService;
+
 
 class Home extends StatefulWidget {
   @override
@@ -23,15 +20,19 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<String> imageList = [
     'https://cdn.pixabay.com/photo/2014/11/05/15/57/salmon-518032_1280.jpg',
-    'https://media.istockphoto.com/photos/woman-kayaking-in-fjord-in-norway-picture-id1059380230?b=1&k=6&m=1059380230&s=170667a&w=0&h=kA_A_XrhZJjw2bo5jIJ7089-VktFK0h0I4OWDqaac0c=',
-    'https://cdn.pixabay.com/photo/2019/11/05/00/53/cellular-4602489_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2017/02/12/10/29/christmas-2059698_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/01/29/17/09/snowboard-4803050_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/02/06/20/01/university-library-4825366_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/11/22/17/28/cat-5767334_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/12/13/16/22/snow-5828736_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2020/12/09/09/27/women-5816861_960_720.jpg',
+    'https://cdn.pixabay.com/photo/2015/09/02/12/43/meal-918639_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/03/09/15/30/breakfast-1246686_1280.jpg',
+    'https://cdn.pixabay.com/photo/2018/07/18/19/12/spaghetti-3547078_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/01/22/02/13/meat-1155132_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/11/18/19/00/breads-1836411_960_720.jpg',
+    'https://cdn.pixabay.com/photo/2017/03/27/13/54/bread-2178874_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/11/29/11/38/blur-1869227_1280.jpg',
+    'https://cdn.pixabay.com/photo/2016/03/09/12/07/dinner-1246287_1280.jpg',
   ];
+
+  void GetPosts(Map<String, String> params) async{
+    final res_code=await PostService.GetPosts(params);
+  }
 
   void _settingModalBottomSheet(context) {
     showModalBottomSheet(
@@ -89,6 +90,7 @@ class _HomeState extends State<Home> {
           );
         });
   }
+
   Widget _buildStories() {
     return Container(
       width: double.infinity,
@@ -98,6 +100,7 @@ class _HomeState extends State<Home> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
+            for (var i = 0; i < users.length; i++)
             SizedBox(
               width: 85.0,
               child: Column(
@@ -110,10 +113,8 @@ class _HomeState extends State<Home> {
                           context,
                           PageRouteBuilder(
                             opaque: false, // set to false
-                            pageBuilder: (context, animation, secondaryAnimation) => StoryScreen(stories: stories),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              return child;
-                            },
+                            pageBuilder: (context, animation, secondaryAnimation) => StoryScreen(stories: stories,user: users[i]),
+
                           ),
                         );
 
@@ -122,9 +123,14 @@ class _HomeState extends State<Home> {
                           MaterialPageRoute(builder: (context) => StoryScreen(stories: stories)),
                         );*/
                       },
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
+                      child: CachedNetworkImage(
+                        imageUrl: users[i].profileImageUrl,
+                        fit: BoxFit.cover,
+                        width: 62,
+                        height: 62,
+                        errorWidget:
+                            (context, url, error) =>
+                            Icon(Icons.error),
                       ),
                       strokeWidth: 1.5,
                       radius: 50,
@@ -138,205 +144,9 @@ class _HomeState extends State<Home> {
                       ),
                     ),
                     Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ]),
-            ),
-            SizedBox(
-              width: 85.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 72,
-                      onPressed: () {},
-                      child: Image.asset(
-                        'assets/images/avatar.png',
-                        height: 60,
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 50,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
-                    ),
-                    Text(
-                      "djo.bibani",
+                      users[i].first_name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.nunito(
                         color: Colors.white,
                         fontSize: 15.0,
@@ -441,11 +251,27 @@ class _HomeState extends State<Home> {
                                         child: Column(
                                             crossAxisAlignment:CrossAxisAlignment.start,
                                             children: <Widget>[
-                                              IconButton(
-                                                icon: Image.asset(
-                                                    "assets/images/avatar.png"),
-                                                iconSize: 35.0,
+                                              StoryButton(
+                                                size: 40,
                                                 onPressed: () {},
+                                                child: CachedNetworkImage(
+                                                  imageUrl:users[0].profileImageUrl,
+                                                  fit: BoxFit.cover,
+                                                  width: 35,
+                                                  height: 35,
+                                                  errorWidget: (context, url, error) =>
+                                                      Icon(Icons.error),
+                                                ),
+                                                strokeWidth: 1.5,
+                                                radius: 60,
+                                                gradient: LinearGradient(
+                                                  begin: Alignment.topRight,
+                                                  end: Alignment.bottomLeft,
+                                                  colors: [
+                                                    Colors.yellow,
+                                                    Colors.orange,
+                                                  ],
+                                                ),
                                               ),
                                             ]),
                                       ),
@@ -455,9 +281,9 @@ class _HomeState extends State<Home> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "djo.bibani",
+                                              users[0].first_name,
                                                 textAlign: TextAlign.start,
-                                                style: GoogleFonts.nunito(
+                                               style: GoogleFonts.nunito(
                                                   color: Colors.white,
                                                   fontSize: 14.0,
                                                   fontWeight: FontWeight.w700,
