@@ -1,38 +1,47 @@
+import 'package:inveat/models/image_user_model.dart';
 import 'package:inveat/models/story_model.dart';
 import 'package:inveat/models/user_model.dart';
 
 final List<User> users = [
   User(
-     first_name: 'Houcem.sanai',
-    profileImageUrl: 'https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png',
+    first_name: 'Houcem',
+    last_name: 'sanai',
+    image_user: ImageUser(name: 'name', url: 'https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-512.png'),
+
   ),
   User(
   first_name: 'judo.valley',
-  profileImageUrl: 'https://cdn.pixabay.com/photo/2013/07/18/20/25/man-164962_1280.jpg',
-),
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2013/07/18/20/25/man-164962_1280.jpg'),
+
+  ),
   User(
-    first_name: 'squirrelssssssssssssssssssssssssssssssssss',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2015/09/02/13/24/girl-919048_1280.jpg',
+    first_name: 'squirrel',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2015/09/02/13/24/girl-919048_1280.jpg'),
+
   ),
   User(
     first_name: 'legolascow',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2018/03/06/22/57/portrait-3204843_1280.jpg',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2018/03/06/22/57/portrait-3204843_1280.jpg'),
+
   ),
   User(
     first_name: 'lego_lascow',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2015/08/05/04/25/people-875617_960_720.jpg',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2015/08/05/04/25/people-875617_960_720.jpg'),
+
   ),
   User(
     first_name: 'ketchuprye',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2016/02/19/10/56/man-1209494_1280.jpg',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2016/02/19/10/56/man-1209494_1280.jpg'),
   ),
   User(
     first_name: 'harpryered',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2017/08/12/18/31/male-2634974_960_720.jpg',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2017/08/12/18/31/male-2634974_960_720.jpg'),
+
   ),
   User(
     first_name: 'owlgiraffe',
-    profileImageUrl: 'https://cdn.pixabay.com/photo/2014/01/03/01/13/woman-237871_960_720.jpg',
+    image_user:  ImageUser(name: 'name', url: 'https://cdn.pixabay.com/photo/2014/01/03/01/13/woman-237871_960_720.jpg'),
+
   ),
 ];
 final List<Story> stories = [

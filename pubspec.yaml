@@ -41,7 +41,14 @@ dependencies:
   video_player : ^2.0.2
   http:
   flutter_easyloading: ^3.0.0
-  flutter_session:
+  liquid_swipe: ^2.0.1
+  storage_path: ^0.2.0
+  lottie: ^1.0.1
+  shared_preferences: ^2.0.5
+  geolocator: ^7.0.1
+  geocoder: ^0.2.1
+  toast: ^0.1.5
+  flutter_image_compress: ^1.0.0
 
 
 dev_dependencies:
@@ -71,7 +78,10 @@ flutter:
     - assets/images/avatar.png
     - assets/images/commentary.png
     - assets/images/bookmark.png
+    - assets/images/conversation.png
+    - assets/images/welcome_background.jpeg
     - assets/jsons/food.json
+    - assets/jsons/comment.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:inveat/models/story_model.dart';
 import 'package:inveat/models/user_model.dart';
 import 'package:video_player/video_player.dart';
+import 'package:inveat/utilities/constants/api.dart' as api;
+
 
 class StoryScreen extends StatefulWidget {
   final List<Story> stories;
@@ -288,7 +290,7 @@ class UserInfo extends StatelessWidget {
           radius: 20.0,
           backgroundColor: Colors.grey[300],
           backgroundImage: CachedNetworkImageProvider(
-            user.profileImageUrl,
+            user.image_user.url,
           ),
         ),
         const SizedBox(width: 10.0),
