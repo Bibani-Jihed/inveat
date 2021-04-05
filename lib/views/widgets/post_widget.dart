@@ -8,36 +8,42 @@ import 'package:inveat/models/post_model.dart';
 import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/utilities/constants/api.dart' as api;
 import 'package:inveat/data/post_service.dart' as PostService;
+import 'package:inveat/data/user_service.dart' as UserService;
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:like_button/like_button.dart';
 import 'package:pinch_zoom_image_last/pinch_zoom_image_last.dart';
 
 class PostWidget extends StatefulWidget {
-  final Post  post;
+  Post  post;
+
 
   @override
   _PostWidgetState createState() => _PostWidgetState();
 
-  const PostWidget({
-    @required this.post,
+   PostWidget({
+    this.post,
   });
 }
 
 class _PostWidgetState extends State<PostWidget> {
+
+  @override
+  void initState() {
+
+  }
+
   String comment = '';
   bool isCommentError = false;
+  bool isLikedDefault =true;
   final _commentController=TextEditingController();
 
   Future<void> _sendComment() async{
-    print("post_id: "+widget.post.id.toString());
-    print("comment: "+comment);
     var tmp=comment;
     _commentController.text="";
     Map<String,String>form={"post_id":widget.post.id.toString(),"comment":tmp};
     final comment_res=await PostService.AddComment(form);
-    print(comment_res.created_at);
     widget.post.comments.add(comment_res);
     FocusScope.of(context).requestFocus(FocusNode());
-
   }
 
   String _getTimeDifferenceFromNow(DateTime dateTime) {
@@ -205,9 +211,8 @@ class _PostWidgetState extends State<PostWidget> {
                 itemCount: widget.post.comments.length,
                 itemBuilder: (context, index) {
                   return Container(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-                          child: _buildCommentItem(widget.post.comments[index]),
+                    margin: EdgeInsets.only(left: 20, bottom: 5),
+                          child: _buildCommentItem(widget.post.comments[index],index),
                     );
                 }),
             SizedBox(height: 70.0,),
@@ -225,17 +230,25 @@ class _PostWidgetState extends State<PostWidget> {
           Image.asset(
             'assets/images/conversation.png',
             height: 120.0,
-            color: Colors.yellow.withOpacity(0.3),
+            color: Colors.white.withOpacity(0.1),
           ),
           SizedBox(
             height: 10.0,
           ),
           Text(
-            'Nothing to show...',
+            'No Comments Yet',
             style: GoogleFonts.nunito(
-              color: Colors.yellow.withOpacity(0.3),
+              color: Colors.white.withOpacity(0.1),
               fontSize: 15.0,
               fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            'Be the first to comment',
+            style: GoogleFonts.nunito(
+              color: Colors.white.withOpacity(0.1),
+              fontSize: 12.0,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -303,89 +316,127 @@ class _PostWidgetState extends State<PostWidget> {
             ));
   }
 
-  Widget _buildCommentItem(Comment comment) {
-    return Container(
-      child: Stack(
-        children: [
-          SizedBox(
-            width: 30.0,
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  StoryButton(
-                    size: 30,
-                    onPressed: () {},
-                    child: CachedNetworkImage(
-                      imageUrl: api.BASE_URL + widget.post.user.image_user.url,
-                      fit: BoxFit.cover,
-                      width: 25,
-                      height: 25,
-                      errorWidget: (context, url, error) => Icon(Icons.error),
+  Widget _buildCommentItem(Comment comment,int index) {
+    return Slidable(
+      actionPane: SlidableDrawerActionPane(),
+      actionExtentRatio: 0.25,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        width: MediaQuery.of(context).size.width,
+        child: Stack(
+          children: [
+            SizedBox(
+              width: 30.0,
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    StoryButton(
+                      size: 30,
+                      onPressed: () {},
+                      child: CachedNetworkImage(
+                        imageUrl: api.BASE_URL + comment.user.image_user.url,
+                        fit: BoxFit.cover,
+                        width: 25,
+                        height: 25,
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                      strokeWidth: 1.5,
+                      radius: 60,
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Colors.yellow,
+                          Colors.orange,
+                        ],
+                      ),
                     ),
-                    strokeWidth: 1.5,
-                    radius: 60,
-                    gradient: LinearGradient(
-                      begin: Alignment.topRight,
-                      end: Alignment.bottomLeft,
-                      colors: [
-                        Colors.yellow,
-                        Colors.orange,
-                      ],
-                    ),
-                  ),
-                ]),
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 40.0),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Wrap(
-                children: [
-                  if (widget.post.content != null)
-                    RichText(
-                        maxLines: null,
-                        text: TextSpan(
-                          style: new TextStyle(
-                            fontSize: 14.0,
-                            color: Colors.white,
-                          ),
-                          children: <TextSpan>[
-                            new TextSpan(
-                              text: widget.post.user.first_name,
-                              style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w700,
-                              ),
+                  ]),
+            ),
+            Container(
+              padding: EdgeInsets.only(left: 40.0),
+
+              child:
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Wrap(
+                  children: [
+                    if (widget.post.content != null)
+                      RichText(
+                          maxLines: null,
+                          text: TextSpan(
+                            style: new TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.white,
                             ),
-                            new TextSpan(text: '  '),
-                            new TextSpan(
-                              text:
-                              comment.comment,
-                              style: GoogleFonts.nunito(
-                                color: Colors.white,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w500,
+                            children: <TextSpan>[
+                              new TextSpan(
+                                text: widget.post.user.first_name,
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                          ],
-                        ))
-                ],
-              ),
-              Text(
-                _getTimeDifferenceFromNow(DateTime.parse(comment.created_at)),
-                textAlign: TextAlign.start,
-                style: GoogleFonts.nunito(
-                  color: Colors.white70,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w200,
+                              new TextSpan(text: '  '),
+                              new TextSpan(
+                                text:
+                                comment.comment,
+                                style: GoogleFonts.nunito(
+                                  color: Colors.white,
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ))
+                  ],
                 ),
-              ),
-            ]),
-          ),
-        ],
+                Text(
+                  _getTimeDifferenceFromNow(DateTime.parse(comment.created_at)),
+                  textAlign: TextAlign.start,
+                  style: GoogleFonts.nunito(
+                    color: Colors.white70,
+                    fontSize: 10.0,
+                    fontWeight: FontWeight.w200,
+                  ),
+                ),
+              ]),
+            ),
+          ],
+        ),
       ),
+      secondaryActions: <Widget>[
+        IconSlideAction(
+          caption: 'Delete',
+          color: Colors.red,
+          icon: Icons.delete,
+          onTap: ()async{
+            final res_code=await PostService.RemoveComment(comment.id);
+            if(res_code==201){
+              setState(() {
+                widget.post.comments=List.from(widget.post.comments)
+                  ..removeAt(index);
+              });
+              Navigator.of(context).pop();
+            }
+          },
+        ),
+      ],
     );
+
+  }
+
+  Future<bool> _isCurrentUserLiked() async {
+    final user=await UserService.GetCurrentUser();
+    for(var like in widget.post.likes){
+      if(like.user.id==user.id) return true;
+    }
+    return false;
+  }
+
+  Future<bool> onLikeButtonTapped(bool isLiked) async{
+    await PostService.LikeOrDislike(widget.post.id);
+    return !isLiked;
   }
 
   @override
@@ -440,7 +491,7 @@ class _PostWidgetState extends State<PostWidget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.post.user.first_name,
+                                widget.post.user.first_name!=null?widget.post.user.first_name+" "+widget.post.user.last_name:"",
                                 textAlign: TextAlign.start,
                                 style: GoogleFonts.nunito(
                                   color: Colors.white,
@@ -482,7 +533,7 @@ class _PostWidgetState extends State<PostWidget> {
               child: PinchZoomImage(
                 image: CachedNetworkImage(
                   fit: BoxFit.cover,
-                  imageUrl: api.BASE_URL + widget.post.image_posts_list[0].url,
+                  imageUrl: api.BASE_URL + widget.post.image_posts[0].url,
                   progressIndicatorBuilder: (context, url, downloadProgress) =>
                       CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
@@ -508,38 +559,45 @@ class _PostWidgetState extends State<PostWidget> {
             child: SingleChildScrollView(
               child: Row(
                 children: [
-                  LikeButton(
-                    size: 30,
-                    circleColor:
-                        CircleColor(start: Colors.yellow, end: Colors.yellow),
-                    bubblesColor: BubblesColor(
-                      dotPrimaryColor: Colors.yellow,
-                      dotSecondaryColor: Colors.yellow,
-                    ),
-                    likeBuilder: (bool isLiked) {
-                      return Icon(
-                        Icons.whatshot,
-                        color: isLiked ? Colors.yellow : Colors.white,
-                        size: 30,
-                      );
-                    },
-                    likeCount: 0,
-                    countBuilder: (int count, bool isLiked, String text) {
-                      var color = isLiked ? Colors.yellow : Colors.white;
-                      Widget result;
-                      if (count == 0) {
-                        result = Text(
-                          "0",
-                          style: TextStyle(color: color),
+                  FutureBuilder(
+                      future: _isCurrentUserLiked(),
+                      builder: (context,snapshot){
+                        return LikeButton(
+                          isLiked: snapshot.data,
+                          onTap: onLikeButtonTapped,
+                          size: 30,
+                          circleColor:
+                          CircleColor(start: Colors.yellow, end: Colors.yellow),
+                          bubblesColor: BubblesColor(
+                            dotPrimaryColor: Colors.yellow,
+                            dotSecondaryColor: Colors.yellow,
+                          ),
+
+                          likeBuilder: (bool isLiked) {
+                            return Icon(
+                              Icons.whatshot,
+                              color: isLiked ? Colors.yellow : Colors.white,
+                              size: 30,
+                            );
+                          },
+                          likeCount: widget.post.likes.length,
+                          countBuilder: (int count, bool isLiked, String text) {
+                            var color = isLiked ? Colors.yellow : Colors.white;
+                            Widget result;
+                            if (count == 0) {
+                              result = Text(
+                                "0",
+                                style: TextStyle(color: color),
+                              );
+                            } else
+                              result = Text(
+                                text,
+                                style: TextStyle(color: color),
+                              );
+                            return result;
+                          },
                         );
-                      } else
-                        result = Text(
-                          text,
-                          style: TextStyle(color: color),
-                        );
-                      return result;
-                    },
-                  ),
+                  }),
                   SizedBox(
                     width: 15.0,
                   ),
@@ -554,7 +612,7 @@ class _PostWidgetState extends State<PostWidget> {
                         },
                       )),
                   Spacer(),
-                  LikeButton(
+                  /*LikeButton(
                     size: 25,
                     circleColor:
                         CircleColor(start: Colors.yellow, end: Colors.yellow),
@@ -568,7 +626,7 @@ class _PostWidgetState extends State<PostWidget> {
                         color: isLiked ? Colors.yellow : Colors.white,
                       );
                     },
-                  ),
+                  ),*/
                 ],
               ),
             ),
@@ -637,3 +695,5 @@ class _PostWidgetState extends State<PostWidget> {
     ));
   }
 }
+
+

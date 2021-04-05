@@ -49,6 +49,7 @@ dependencies:
   geocoder: ^0.2.1
   toast: ^0.1.5
   flutter_image_compress: ^1.0.0
+  flutter_slidable: ^0.5.7
 
 
 dev_dependencies:
@@ -80,8 +81,10 @@ flutter:
     - assets/images/bookmark.png
     - assets/images/conversation.png
     - assets/images/welcome_background.jpeg
+    - assets/images/filter.png
     - assets/jsons/food.json
     - assets/jsons/comment.json
+    - assets/jsons/no_result.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

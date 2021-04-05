@@ -10,6 +10,7 @@ import 'package:inveat/utilities/constants/colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../personal_information_screen.dart';
 import 'package:inveat/data/user_service.dart' as UserService;
+import 'package:inveat/data/post_service.dart' as PostService;
 import 'package:inveat/utilities/constants/api.dart' as api;
 import 'package:inveat/views/welcome_screen.dart';
 import 'package:inveat/models/post_model.dart';
@@ -68,57 +69,68 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
   );
 
   void changePage(int index) {
-    print(index);
     _tabIndex = index;
     _tabController.index = _tabIndex;
     _tabController.animateTo(_tabIndex);
     _pageController.animateToPage(_tabIndex,
         duration: Duration(milliseconds: 500), curve: Curves.ease);
   }
+  Future<List<Post>>_getUserPosts ({Map<String, String> params})async{
+    final user=await UserService.GetCurrentUser();
+    final posts = await PostService.GetPosts(params);
+    List<Post>user_posts=new List<Post>();
+    for(var post in posts){
+      if(post.user.id==user.id && post.image_posts.length>0){
+        user_posts.add(post);
+    }
+    }
+    return user_posts;
+  }
 
   Widget buildFeedView() {
     return Container(
-      margin: EdgeInsets.all(12.0),
-      child: StaggeredGridView.countBuilder(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          shrinkWrap: false,
-          mainAxisSpacing: 12,
-          //physics: NeverScrollableScrollPhysics(),
-          itemCount: imageList.length,
-          itemBuilder: (BuildContext context, int index) =>
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            PostScreen(
-                                post: new Post(
-                                    image_posts: ImagePosts(id: 1,
-                                        name: 'name',
-                                        url: imageList[index]),
-                                    user: users[0],
-                                    content: captions[index]))),
-                  );
-                },
-                child: new Container(
-                  decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.all(Radius.circular(15))),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
-                    child: CachedNetworkImage(
-                      imageUrl: imageList[index],
-                      fit: BoxFit.cover,
-                      errorWidget: (context, url, error) => Icon(Icons.error),
+      margin: EdgeInsets.only(left: 12.0,right:12.0,bottom: 12.0),
+      child:
+      FutureBuilder<List<Post>>(
+          future: _getUserPosts(),
+          builder: (context, snapshot) {
+            return  StaggeredGridView.countBuilder(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                shrinkWrap: false,
+                mainAxisSpacing: 12,
+                //physics: NeverScrollableScrollPhysics(),
+                itemCount: snapshot.data==null?0:snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) =>
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  PostScreen(
+                                      post: snapshot.data[index])),
+                        );
+                      },
+                      child: new Container(
+                        decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.all(Radius.circular(15))),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(15)),
+                          child: CachedNetworkImage(
+                            imageUrl: api.BASE_URL+snapshot.data[index].image_posts[0].url,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, error) => Icon(Icons.error),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-          staggeredTileBuilder: (index) {
-            return StaggeredTile.count(1, index.isEven ? 1.2 : 1.8);
+                staggeredTileBuilder: (index) {
+                  return StaggeredTile.count(1, index.isEven ? 1.2 : 1.8);
+                });
           }),
+
     );
   }
 
@@ -126,7 +138,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     return SingleChildScrollView(
       physics: AlwaysScrollableScrollPhysics(),
       child: Container(
-        padding: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+        padding: EdgeInsets.all(20.0),
         child: Column(
           children: [
             Container(
@@ -238,60 +250,6 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     );
   }
 
-  void _settingModalBottomSheet(context) {
-    showModalBottomSheet(
-        isScrollControlled: true,
-        context: context,
-        builder: (BuildContext bc) {
-          return Container(
-            color: MColors.black,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-
-                  new ListTile(
-                      title: new Text(
-                        "Settings",
-                        style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onTap: () =>
-                      {
-                        Navigator.pop(context),
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => SettingsScreen()),
-                        ),
-                      }),
-                  new ListTile(
-                    title: Text(
-                      "Logout",
-                      style: GoogleFonts.nunito(
-                        color: Colors.red,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    onTap: () async => {
-                      await SharedPreferences.getInstance().then((value) => value.remove("user")),
-                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
-                          Welcome()), (Route<dynamic> route) => false),
-                    },
-                  ),
-
-
-                ],
-              ),
-            ),
-          );
-        });
-  }
-
   Widget buildPageView(User user) {
     return PageView(
       controller: _pageController,
@@ -323,7 +281,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 10.0,
-                      vertical: 60.0,
+                      vertical: 40.0,
                     ),
                     child: Column(
                       children: [
@@ -345,7 +303,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                   ),
                                   iconSize: 40.0,
                                   onPressed: () {
-                                    _settingModalBottomSheet(context);
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                        builder: (context) => SettingsScreen()));
                                   },
                                 ),
                               ),
@@ -359,10 +320,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                               return [
                                 SliverAppBar(
                                   backgroundColor: MColors.black,
-                                  collapsedHeight: 320,
-                                  expandedHeight: 320,
+                                  collapsedHeight: 225,
+                                  expandedHeight: 225,
                                   flexibleSpace: Container(
-                                    margin: EdgeInsets.only(top: 40.0),
                                     child: Column(children: <Widget>[
                                       StoryButton(
                                         size: 140,
@@ -404,14 +364,18 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                                             flex: 1,
                                             child: Column(
                                               children: [
-                                                Text(
-                                                  "301",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white,
-                                                    fontSize: 20.0,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
+                                                FutureBuilder(
+                                                    future:_getUserPosts(),
+                                                    builder: (context,snapshot){
+                                                  return Text(
+                                                    snapshot.data!=null?snapshot.data.length.toString():"0",
+                                                    style: GoogleFonts.nunito(
+                                                      color: Colors.white,
+                                                      fontSize: 20.0,
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
+                                                  );
+                                                }),
                                                 Text(
                                                   "Posts",
                                                   style: GoogleFonts.nunito(

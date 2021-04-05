@@ -14,8 +14,7 @@ class Post {
    String title;
    String created_at;
    User user;
-   ImagePosts image_posts;
-   List <ImagePosts> image_posts_list;
+   List <ImagePosts> image_posts;
    List <Comment> comments;
    List <Like> likes;
 
@@ -26,10 +25,9 @@ class Post {
     @required this.title,
     @required this.created_at,
     @required this.user,
-     @required this.image_posts,
      @required this.comments,
      @required this.likes,
-     @required this.image_posts_list,
+     @required this.image_posts,
 
   });
 
@@ -40,8 +38,7 @@ class Post {
          type: json['type'],
          created_at: json['created_at'],
          user: User.fromJson(json['user']),
-         image_posts: ImagePosts.fromJson(json['image_posts2']),
-         image_posts_list: (json['image_posts'] as List)
+         image_posts: (json['image_posts'] as List)
              .map((data) => new ImagePosts.fromJson(data))
              .toList(),
          comments: (json['comments'] as List)
@@ -58,7 +55,6 @@ class Post {
      data['content'] = this.content;
      data['created_at'] = this.created_at;
      data['user'] = this.user;
-     data['image_posts'] = this.image_posts;
      return data;
    }
 }

@@ -36,10 +36,16 @@ class _PostSelectionState extends State<PostSelection> {
   String title;
 
   bool isTitleError=false;
+  bool isCaptionError=false;
 
   void SharePost() async {
     print(caption);
     print(title);
+    if(caption==null||caption.isEmpty){
+      setState(() {
+        isCaptionError=true;
+      });
+    }
     if(title==null||title.isEmpty){
       setState(() {
         isTitleError=true;
@@ -52,9 +58,9 @@ class _PostSelectionState extends State<PostSelection> {
         'title': title,
         'type': 'image'
       };
-      final status_code = await PostService.AddPost(File(image), form);
+      final post_res = await PostService.AddPost(File(image), form);
       EasyLoading.dismiss();
-      if(status_code==200){
+      if(post_res!=null){
         Navigator.pop(context);
       }else{
         Toast.show("error occurred, please try again", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
@@ -285,17 +291,20 @@ class _PostSelectionState extends State<PostSelection> {
                             decoration: BoxDecoration(
                               color: MColors.black,
                               border: Border.all(
-                                  color: MColors.mc_end, // set border color
+                                  color: isCaptionError?Colors.red:MColors.mc_end, // set border color
                                   width: 2.0), // set border width
                               borderRadius: BorderRadius.all(Radius.circular(
                                   20.0)), // set rounded corner radius
                             ),
                             child: TextField(
                               onChanged: (text) {
+
                                 setState(() {
                                   captionLength = text.length;
                                 });
                                 caption = text;
+                                isCaptionError=false;
+
                               },
                               maxLines: null,
                               maxLength: 350,

@@ -3,10 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:inveat/lib/utilities/constants/colors.dart'
     as mColors;
 import 'package:inveat/utilities/constants/strings.dart' as Strings;
+import 'package:inveat/views/welcome_screen.dart';
 import 'package:pinch_zoom_image_last/pinch_zoom_image_last.dart';
 import 'package:inveat/models/post_model.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/data.dart';
 import 'package:inveat/views/personal_information_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -263,7 +265,8 @@ class _SettingsState extends State<SettingsScreen> {
           ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 60.0),
-            child: Row(
+            child:
+             Row(
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_back),
@@ -282,8 +285,48 @@ class _SettingsState extends State<SettingsScreen> {
                   ),
                 ),
               ],
-            ),
+            )
           ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+
+              ElevatedButton(
+                child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center, //Center Row contents horizontally,
+                    crossAxisAlignment: CrossAxisAlignment.center, //Center Row contents vertically,
+                  children: [
+
+                    Text(
+                      "Log out",
+                      textAlign: TextAlign.start,
+                      style: GoogleFonts.nunito(
+                        color: Colors.red,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                     SizedBox(
+                       width: 10.0,
+                     ),
+                     Icon(Icons.logout,color: Colors.red,),
+
+                  ],
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: mColors.black,
+                  onPrimary: mColors.mc_start,
+                ),
+                onPressed: () async{
+                  await SharedPreferences.getInstance().then((value) => value.remove("user"));
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) =>
+                      Welcome()), (Route<dynamic> route) => false);
+                },
+              ),
+              SizedBox(height: 20.0,),
+
+            ],
+          )
         ],
       ),
     );

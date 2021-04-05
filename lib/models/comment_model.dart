@@ -17,7 +17,6 @@ class Comment {
   });
 
   factory Comment.fromJson(Map<String, dynamic> json) {
-    print(json['user'].toString());
     return Comment(
       id: json['id'],
       comment: json['comment'],

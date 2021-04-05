@@ -1,17 +1,20 @@
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_button/insta/story_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:inveat/lib/utilities/constants/colors.dart' as mColors;
-import 'package:inveat/models/image_posts_model.dart';
+import 'package:inveat/data/place_service.dart' as PlaceService;
 import 'package:inveat/models/post_model.dart';
+import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/views/new_post_selection_screen.dart';
 import 'package:inveat/views/widgets/post_widget.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/views/story_screen.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/data.dart';
 import 'package:inveat/data/post_service.dart' as PostService;
 import 'package:inveat/utilities/constants/api.dart' as api;
+import 'package:lottie/lottie.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -41,8 +44,16 @@ class _HomeState extends State<Home> {
     'A sass a day keeps the basics away',
   ];
   String comment;
+  String dropdownValue = 'All';
 
-  Future<List<Post>> GetPosts({Map<String, String> params}) async {
+
+  Future<List<Post>> GetPosts() async {
+    Map<String, String> params;
+    if (dropdownValue == "All") {
+      params = null;
+    }else if(dropdownValue == "Nearby"){
+      params= await PlaceService.GetInfoForNearbyPosts();
+    }
     final posts = await PostService.GetPosts(params);
     return posts;
   }
@@ -118,6 +129,55 @@ class _HomeState extends State<Home> {
     );
   }
 
+  Widget _buildPosts()  {
+    Map<String, String> params;
+
+    return FutureBuilder<List<Post>>(
+        future: GetPosts(),
+        builder: (context, snapshot) {
+          return ListView.builder(
+              physics: NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              shrinkWrap: true,
+              itemCount: snapshot.data != null ? snapshot.data.length : 1,
+              itemBuilder: (context, index) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  if (snapshot.data[index].image_posts.length >= 1)
+                  {
+                    return PostWidget(post: snapshot.data[index]);
+                  }
+                } else {
+                  return Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 350,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/images/shutter.png',
+                          height: 120.0,
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                        SizedBox(
+                          height: 10.0,
+                        ),
+                        Text(
+                          'No Posts Yet',
+                          style: GoogleFonts.nunito(
+                            color: Colors.white.withOpacity(0.1),
+                            fontSize: 15.0,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              });
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,24 +244,40 @@ class _HomeState extends State<Home> {
                   Divider(
                     color: Colors.white10,
                   ),
-                  FutureBuilder<List<Post>>(
-                      future: GetPosts(),
-                      builder: (context, snapshot) {
-                        return  ListView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            itemCount: snapshot.data != null
-                                ? snapshot.data.length
-                                : 10,
-                            itemBuilder: (context, index) {
-                              if(snapshot.hasData && snapshot.data!=null)
-                                if(snapshot.data[index].image_posts_list.length>=1)
-                                  return PostWidget(post: snapshot.data[index]);
-                                else
-                                  return Container();
-                            });
-                      }),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      DropdownButton<String>(
+                        icon: Image.asset("assets/images/filter.png"),
+                        dropdownColor: Colors.black,
+                        onChanged: (String newValue) {
+                          setState(() {
+                            dropdownValue = newValue;
+                          });
+                        },
+                        underline: Container(
+                          height: 0,
+                          color: MColors.black,
+                        ),
+                        items: <String>['All', 'Nearby']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(
+                              value,
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      )
+                    ],
+                  ),
+                  _buildPosts(),
+
                   //Lets Sign
                 ],
               ),

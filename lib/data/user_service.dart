@@ -16,7 +16,6 @@ Future<void>ConfigUser(response) async {
 
 Future<int>Signup(Map<String, String> body) async {
   final response= await HttpPost(body, Uri.parse(api.USER));
-  print(response.body);
 
   if (response.statusCode == 200) {
     ConfigUser(response);
@@ -53,11 +52,9 @@ Future<int> UploadUserImage(file) async {
   http.Response response = await http.Response.fromStream(await request.send());
 
   if(response.statusCode==200) {
-    print(response.body);
     final Map bodyRes = jsonDecode(response.body);
     User user = await GetCurrentUser();
     user.image_user =new ImageUser(url:bodyRes["data"]["url"],name:bodyRes["data"]["name"]);
-    print(user.image_user.url);
     UpdateCurrentUser(json.encode(user));
   }
   return response.statusCode;
@@ -71,7 +68,6 @@ Future<Response> HttpPost(Map<String, String> body,Uri uri)  async{
   };
   final response = await http.post(uri,
       body: jsonEncode(body), headers: headers);
-  print(response.body);
   return response;
 }
 Future<Response> HttpGet(Map<String, String> body,Uri uri)  async{
@@ -84,7 +80,6 @@ Future<Response> HttpPatch(Map<String, String> body,Uri uri)  async{
     'Authorization' : 'jwt '+token
   };
   final response = await http.patch(uri,body: jsonEncode(body), headers: headers);
-  print(response.body);
   final Map bodyRes = jsonDecode(response.body);
   final user=User.fromJson(bodyRes["data"]);
   user.image_user.url=bodyRes["data"]["image_user"]["url"].toString();
@@ -96,7 +91,6 @@ Future<Response> HttpDelete(Uri uri)  async{
     'Content-Type': 'application/json; charset=UTF-8',
   };
   final response = await http.delete(uri, headers: headers);
-  print(response.body);
   return response;
 }
 
@@ -107,7 +101,6 @@ Future<User>GetCurrentUser() async{
 }
 Future<void>UpdateCurrentUser(String encoded_user) async{
   final prefs = await SharedPreferences.getInstance();
-  print(encoded_user);
   prefs.setString("user", encoded_user);
 }
 Future<String>GetToken() async{
@@ -117,5 +110,6 @@ Future<String>GetToken() async{
 Future<void>UpdateToken(String token) async{
   final prefs = await SharedPreferences.getInstance();
   prefs.setString("token", token);
+
 }
 

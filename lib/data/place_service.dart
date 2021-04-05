@@ -58,5 +58,24 @@ Future<String>GetAddress() async {
   print("subAdminArea: "+first.subAdminArea);
   print("subThoroughfare: "+first.subThoroughfare);*/
   return '${first.locality},${first.adminArea},${first.countryName}';
+}
 
+Future<Map<String,dynamic>>GetInfoForNearbyPosts() async {
+  Position position = await _getPosition();
+  final coordinates = new Coordinates(position.latitude, position.longitude);
+  var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+  var first = addresses.first;
+  print("${first.featureName}");
+  print("featureName: "+first.featureName);
+  print("addressLine: "+first.addressLine);
+  print("adminArea: "+first.adminArea);
+  print("countryName: "+first.countryName);
+  print("locality: "+first.locality);
+  print("thoroughfare: "+first.thoroughfare);
+  print("subAdminArea: "+first.subAdminArea);
+  print("subThoroughfare: "+first.subThoroughfare);
+  Map<String,dynamic> info ={
+    "city":first.locality,"lat":position.latitude,"lng":position.longitude,"radius":5};
+
+  return info;
 }
