@@ -254,7 +254,7 @@ class _HomeState extends State<Home> {
           ),
 
           Container(
-            margin: EdgeInsets.only(top:60.0),
+            margin: EdgeInsets.only(top: 25.0),
             child: RefreshIndicator(
               key: _refreshIndicatorKey,
               color: Colors.yellow,
@@ -262,9 +262,11 @@ class _HomeState extends State<Home> {
               child: Container(
                 child: SingleChildScrollView(
                   physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 10.0,
-                    vertical: 60.0,
+                  padding: EdgeInsets.only(
+                    left: 10.0,
+                    right: 10.0,
+                    bottom: 60.0,
+                    top: 35.0
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -293,41 +295,7 @@ class _HomeState extends State<Home> {
                       Divider(
                         color: Colors.white10,
                       ),
-                      SizedBox(child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
 
-                          DropdownButton<String>(
-                            icon: Image.asset("assets/images/filter.png"),
-                            dropdownColor: Colors.black,
-                            onChanged: (String newValue) {
-                              setState(() {
-                                dropdownValue = newValue;
-                              });
-                              GetPosts();
-                            },
-                            underline: Container(
-                              height: 0,
-                              color: MColors.black,
-                            ),
-                            items: <String>['All', 'Nearby']
-                                .map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: GoogleFonts.nunito(
-                                    color: Colors.white,
-                                    fontSize: 14.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                          SizedBox(width: 8.0,)
-                        ],
-                      ),height: 30.0,),
                       //_buildPosts(),
                       _buildPostsStream(),
                       //Lets Sign
@@ -341,11 +309,41 @@ class _HomeState extends State<Home> {
 
           Container(
             color: MColors.black,
-            margin: EdgeInsets.only(top: 40.0),
+            padding: EdgeInsets.only(top: 8.0,right: 10.0),
             height: 60.0,
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
+
+                  DropdownButton<String>(
+                    icon: Image.asset("assets/images/filter.png"),
+                    dropdownColor: Colors.black,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        dropdownValue = newValue;
+                      });
+                      GetPosts();
+                    },
+                    underline: Container(
+                      height: 0,
+                      color: MColors.black,
+                    ),
+                    items: <String>['All', 'Nearby']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: GoogleFonts.nunito(
+                            color: Colors.white,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  SizedBox(width: 8.0,),
                   SizedBox(
                     height: 40.0,
                     width: 40.0,
