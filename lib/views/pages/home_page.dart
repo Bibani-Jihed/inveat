@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
@@ -22,6 +23,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  StreamController _postsController;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  new GlobalKey<RefreshIndicatorState>();
   List<String> imageList = [
     'https://cdn.pixabay.com/photo/2014/11/05/15/57/salmon-518032_1280.jpg',
     'https://cdn.pixabay.com/photo/2015/09/02/12/43/meal-918639_1280.jpg',
@@ -45,16 +49,18 @@ class _HomeState extends State<Home> {
   ];
   String comment;
   String dropdownValue = 'All';
-
+  List<Post>posts=List.empty();
 
   Future<List<Post>> GetPosts() async {
+    _refreshIndicatorKey.currentState?.show();
     Map<String, String> params;
     if (dropdownValue == "All") {
       params = null;
     }else if(dropdownValue == "Nearby"){
       params= await PlaceService.GetInfoForNearbyPosts();
     }
-    final posts = await PostService.GetPosts(params);
+    posts=await PostService.GetPosts(params);
+    _postsController.add(posts);
     return posts;
   }
 
@@ -131,7 +137,6 @@ class _HomeState extends State<Home> {
 
   Widget _buildPosts()  {
     Map<String, String> params;
-
     return FutureBuilder<List<Post>>(
         future: GetPosts(),
         builder: (context, snapshot) {
@@ -177,6 +182,63 @@ class _HomeState extends State<Home> {
               });
         });
   }
+  Widget _buildPostsStream(){
+    return
+      StreamBuilder(
+          stream: _postsController.stream,
+          builder: (context, snapshot) {
+            return ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                itemCount: snapshot.data != null ? snapshot.data.length : 1,
+                itemBuilder: (context, index) {
+                  if(snapshot.hasError){
+                    print("error fetching");
+                  }
+                  if (snapshot.hasData && snapshot.data != null) {
+                    if (snapshot.data[index].image_posts.length >= 1)
+                    {
+                      return PostWidget(post: snapshot.data[index]);
+                    }
+                  } else {
+                    return Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 350,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/shutter.png',
+                            height: 120.0,
+                            color: Colors.white.withOpacity(0.1),
+                          ),
+                          SizedBox(
+                            height: 10.0,
+                          ),
+                          Text(
+                            'No Posts Yet',
+                            style: GoogleFonts.nunito(
+                              color: Colors.white.withOpacity(0.1),
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                });
+          });
+
+  }
+  @override
+  void initState() {
+    _postsController = new StreamController();
+    GetPosts();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,99 +252,118 @@ class _HomeState extends State<Home> {
               color: mColors.black,
             ),
           ),
+
           Container(
-            child: SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                horizontal: 10.0,
-                vertical: 60.0,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Container(
-                    child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 40.0,
-                            width: 40.0,
-                            child: IconButton(
-                              icon: Image.asset("assets/images/shutter.png"),
-                              iconSize: 40.0,
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => PostSelection()),
-                                );
-                              },
-                            ),
-                          ),
-                        ]),
+            margin: EdgeInsets.only(top:60.0),
+            child: RefreshIndicator(
+              key: _refreshIndicatorKey,
+              color: Colors.yellow,
+              backgroundColor: MColors.black,
+              child: Container(
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.0,
+                    vertical: 60.0,
                   ),
-                  Container(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Text(
-                          "Trending",
-                          style: GoogleFonts.nunito(
-                            color: Colors.white,
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        //Lets Sign
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: 20.0,
-                  ),
-                  _buildStories(),
-                  Divider(
-                    color: Colors.white10,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      DropdownButton<String>(
-                        icon: Image.asset("assets/images/filter.png"),
-                        dropdownColor: Colors.black,
-                        onChanged: (String newValue) {
-                          setState(() {
-                            dropdownValue = newValue;
-                          });
-                        },
-                        underline: Container(
-                          height: 0,
-                          color: MColors.black,
-                        ),
-                        items: <String>['All', 'Nearby']
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+
+                      Container(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              "Trending",
                               style: GoogleFonts.nunito(
                                 color: Colors.white,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w700,
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w800,
                               ),
                             ),
-                          );
-                        }).toList(),
-                      )
+                            //Lets Sign
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                      _buildStories(),
+                      Divider(
+                        color: Colors.white10,
+                      ),
+                      SizedBox(child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+
+                          DropdownButton<String>(
+                            icon: Image.asset("assets/images/filter.png"),
+                            dropdownColor: Colors.black,
+                            onChanged: (String newValue) {
+                              setState(() {
+                                dropdownValue = newValue;
+                              });
+                              GetPosts();
+                            },
+                            underline: Container(
+                              height: 0,
+                              color: MColors.black,
+                            ),
+                            items: <String>['All', 'Nearby']
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          SizedBox(width: 8.0,)
+                        ],
+                      ),height: 30.0,),
+                      //_buildPosts(),
+                      _buildPostsStream(),
+                      //Lets Sign
                     ],
                   ),
-                  _buildPosts(),
-
-                  //Lets Sign
-                ],
+                ),
               ),
+              onRefresh: GetPosts,
             ),
           ),
+
+          Container(
+            color: MColors.black,
+            margin: EdgeInsets.only(top: 40.0),
+            height: 60.0,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  SizedBox(
+                    height: 40.0,
+                    width: 40.0,
+                    child: IconButton(
+                      icon: Image.asset("assets/images/shutter.png"),
+                      iconSize: 40.0,
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PostSelection()),
+                        );
+                      },
+                    ),
+                  ),
+                ]),
+          ),
+
         ],
       ),
     );

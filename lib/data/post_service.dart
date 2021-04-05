@@ -11,13 +11,15 @@ Future<List<Post>> GetPosts(Map<String, String> params) async {
   print("GetPosts");
   final response = await HttpGet(params, api.POSTS);
   print(response.body);
-  final Map bodyRes = jsonDecode(response.body);
+  if(response.statusCode==200){
+    final Map bodyRes = jsonDecode(response.body);
+    var posts = (bodyRes["data"]["data"] as List)
+        .map((value) => Post.fromJson(value))
+        .toList();
+    return posts;
+  }
+  else return null;
 
-
-  var posts = (bodyRes["data"]["data"] as List)
-      .map((value) => Post.fromJson(value))
-      .toList();
-  return posts;
 }
 Future<Post> AddPost(file,Map<String, String> body) async {
   final token=await UserService.GetToken();
@@ -53,7 +55,7 @@ Future<int> LikeOrDislike(int post_id) async {
   final response= await HttpPost(body, Uri.parse(api.LIKE+'/'+post_id.toString()));
   return response.statusCode;
 }
-Future<Response> HttpGet(Map<String, String> params, String uri) async {
+Future<Response> HttpGet(Map<String, dynamic> params, String uri) async {
   Map<String, String> headers = {
     'Content-Type': 'application/json; charset=UTF-8',
   };

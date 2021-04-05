@@ -75,7 +75,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     _pageController.animateToPage(_tabIndex,
         duration: Duration(milliseconds: 500), curve: Curves.ease);
   }
-  Future<List<Post>>_getUserPosts ({Map<String, String> params})async{
+  Future<List<Post>>_getUserPosts ({Map<String, dynamic> params})async{
     final user=await UserService.GetCurrentUser();
     final posts = await PostService.GetPosts(params);
     List<Post>user_posts=new List<Post>();

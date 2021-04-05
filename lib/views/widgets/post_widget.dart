@@ -29,7 +29,6 @@ class _PostWidgetState extends State<PostWidget> {
 
   @override
   void initState() {
-
   }
 
   String comment = '';
@@ -425,7 +424,6 @@ class _PostWidgetState extends State<PostWidget> {
     );
 
   }
-
   Future<bool> _isCurrentUserLiked() async {
     final user=await UserService.GetCurrentUser();
     for(var like in widget.post.likes){
@@ -433,7 +431,6 @@ class _PostWidgetState extends State<PostWidget> {
     }
     return false;
   }
-
   Future<bool> onLikeButtonTapped(bool isLiked) async{
     await PostService.LikeOrDislike(widget.post.id);
     return !isLiked;
