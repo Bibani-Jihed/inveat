@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:inveat/models/address_post.dart';
 import 'package:inveat/models/comment_model.dart';
 import 'package:inveat/models/image_posts_model.dart';
 import 'package:inveat/models/user_model.dart';
@@ -14,6 +15,7 @@ class Post {
    String title;
    String created_at;
    User user;
+   Address address_post;
    List <ImagePosts> image_posts;
    List <Comment> comments;
    List <Like> likes;
@@ -24,7 +26,8 @@ class Post {
     @required this.type,
     @required this.title,
     @required this.created_at,
-    @required this.user,
+     @required this.user,
+     @required this.address_post,
      @required this.comments,
      @required this.likes,
      @required this.image_posts,
@@ -38,6 +41,7 @@ class Post {
          type: json['type'],
          created_at: json['created_at'],
          user: User.fromJson(json['user']),
+         address_post: Address.fromJson(json['address_post']),
          image_posts: (json['image_posts'] as List)
              .map((data) => new ImagePosts.fromJson(data))
              .toList(),

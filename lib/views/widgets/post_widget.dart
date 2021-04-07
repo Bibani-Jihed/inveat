@@ -497,7 +497,7 @@ class _PostWidgetState extends State<PostWidget> {
                                 ),
                               ),
                               Text(
-                                "djerba",
+                                widget.post.address_post!=null?widget.post.address_post.city+","+widget.post.address_post.governerate+","+widget.post.address_post.country:"",
                                 textAlign: TextAlign.start,
                                 style: GoogleFonts.nunito(
                                   color: Colors.white70,

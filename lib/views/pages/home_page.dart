@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +13,6 @@ import 'package:inveat/views/widgets/post_widget.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/views/story_screen.dart';
 import 'file:///C:/Users/ASUS/AndroidStudioProjects/inveat/lib/utilities/data.dart';
 import 'package:inveat/data/post_service.dart' as PostService;
-import 'package:inveat/utilities/constants/api.dart' as api;
-import 'package:lottie/lottie.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -26,31 +23,9 @@ class _HomeState extends State<Home> {
   StreamController _postsController;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   new GlobalKey<RefreshIndicatorState>();
-  List<String> imageList = [
-    'https://cdn.pixabay.com/photo/2014/11/05/15/57/salmon-518032_1280.jpg',
-    'https://cdn.pixabay.com/photo/2015/09/02/12/43/meal-918639_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/03/09/15/30/breakfast-1246686_1280.jpg',
-    'https://cdn.pixabay.com/photo/2018/07/18/19/12/spaghetti-3547078_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/01/22/02/13/meat-1155132_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/11/18/19/00/breads-1836411_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2017/03/27/13/54/bread-2178874_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/03/09/12/07/dinner-1246287_1280.jpg',
-  ];
-  List<String> captions = [
-    'Whatever is good for your soul, do that',
-    'Even the stars were jealous of the sparkle in her eyes',
-    'Stress less and enjoy the best',
-    'Get out there and live a little ',
-    'I’m not high maintenance, you’re just low effort',
-    'I’m not gonna sugar coat the truth, I’m not Willy Wonka ',
-    'Life is better when you’re laughing',
-    'Look for the magic in every moment',
-    'A sass a day keeps the basics away',
-  ];
   String comment;
   String dropdownValue = 'All';
   List<Post>posts=List.empty();
-
   Future<List<Post>> GetPosts() async {
     _refreshIndicatorKey.currentState?.show();
     Map<String, String> params;
@@ -58,12 +33,19 @@ class _HomeState extends State<Home> {
       params = null;
     }else if(dropdownValue == "Nearby"){
       params= await PlaceService.GetInfoForNearbyPosts();
+      print("params: "+params.toString());
     }
-    posts=await PostService.GetPosts(params);
+
+    final tmp=await PostService.GetPosts(params);
+    setState(() {
+      posts=tmp;
+    });
+    if(posts.length==0){
+      posts=null;
+    }
     _postsController.add(posts);
     return posts;
   }
-
   Widget _buildStories() {
     return Container(
       width: double.infinity,
@@ -134,54 +116,6 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-
-  Widget _buildPosts()  {
-    Map<String, String> params;
-    return FutureBuilder<List<Post>>(
-        future: GetPosts(),
-        builder: (context, snapshot) {
-          return ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              shrinkWrap: true,
-              itemCount: snapshot.data != null ? snapshot.data.length : 1,
-              itemBuilder: (context, index) {
-                if (snapshot.hasData && snapshot.data != null) {
-                  if (snapshot.data[index].image_posts.length >= 1)
-                  {
-                    return PostWidget(post: snapshot.data[index]);
-                  }
-                } else {
-                  return Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: 350,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Image.asset(
-                          'assets/images/shutter.png',
-                          height: 120.0,
-                          color: Colors.white.withOpacity(0.1),
-                        ),
-                        SizedBox(
-                          height: 10.0,
-                        ),
-                        Text(
-                          'No Posts Yet',
-                          style: GoogleFonts.nunito(
-                            color: Colors.white.withOpacity(0.1),
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              });
-        });
-  }
   Widget _buildPostsStream(){
     return
       StreamBuilder(
@@ -193,15 +127,13 @@ class _HomeState extends State<Home> {
                 shrinkWrap: true,
                 itemCount: snapshot.data != null ? snapshot.data.length : 1,
                 itemBuilder: (context, index) {
-                  if(snapshot.hasError){
-                    print("error fetching");
-                  }
                   if (snapshot.hasData && snapshot.data != null) {
                     if (snapshot.data[index].image_posts.length >= 1)
                     {
                       return PostWidget(post: snapshot.data[index]);
                     }
-                  } else {
+                  }
+                  else {
                     return Container(
                       width: MediaQuery.of(context).size.width,
                       height: 350,

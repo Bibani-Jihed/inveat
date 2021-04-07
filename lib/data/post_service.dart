@@ -16,13 +16,15 @@ Future<List<Post>> GetPosts(Map<String, String> params) async {
     var posts = (bodyRes["data"]["data"] as List)
         .map((value) => Post.fromJson(value))
         .toList();
+    print("length: "+posts.length.toString());
     return posts;
   }
   else return null;
 
 }
-Future<Post> AddPost(file,Map<String, String> body) async {
+Future<Post> AddPost(file,Map<String, dynamic> body) async {
   final token=await UserService.GetToken();
+  print("Add Post: "+jsonEncode(body['address']));
   var request = http.MultipartRequest('POST', Uri.parse(api.POST));
   request.headers["Authorization"]="jwt "+token;
   request.headers["Content-Type"]="multipart/form-data";
@@ -30,7 +32,9 @@ Future<Post> AddPost(file,Map<String, String> body) async {
   request.fields['title']=body['title'];
   request.fields['content']=body['content'];
   request.fields['type']=body['type'];
+  request.fields['address']=jsonEncode(body['address']);
   http.Response response = await http.Response.fromStream(await request.send());
+  print(response.body);
   return Post.fromJson(jsonDecode(response.body));
 }
 Future<Comment> AddComment(Map<String, String> body) async {

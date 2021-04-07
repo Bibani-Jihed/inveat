@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:geocoder/geocoder.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:inveat/models/address_post.dart' as AddressPost;
 import 'package:http/http.dart';
 
 
@@ -43,12 +44,12 @@ import 'package:http/http.dart';
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
-Future<String>GetAddress() async {
+Future<AddressPost.Address>GetAddress() async {
   Position position = await _getPosition();
   final coordinates = new Coordinates(position.latitude, position.longitude);
   var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
   var first = addresses.first;
-  /*print("${first.featureName}");
+  print("${first.featureName}");
   print("featureName: "+first.featureName);
   print("addressLine: "+first.addressLine);
   print("adminArea: "+first.adminArea);
@@ -56,8 +57,10 @@ Future<String>GetAddress() async {
   print("locality: "+first.locality);
   print("thoroughfare: "+first.thoroughfare);
   print("subAdminArea: "+first.subAdminArea);
-  print("subThoroughfare: "+first.subThoroughfare);*/
-  return '${first.locality},${first.adminArea},${first.countryName}';
+  print("longitude: "+position.longitude.toString());
+  print("latitude: "+ position.latitude.toString());
+  final address=new AddressPost.Address(city:first.locality,country: first.countryName,governerate:first.adminArea,street_number:00,street:"default",zip_code: 0000,latitude: position.latitude,longitude: position.longitude);
+  return address;
 }
 
 Future<Map<String,String>>GetInfoForNearbyPosts() async {
@@ -73,8 +76,9 @@ Future<Map<String,String>>GetInfoForNearbyPosts() async {
   print("locality: "+first.locality);
   print("thoroughfare: "+first.thoroughfare);
   print("subAdminArea: "+first.subAdminArea);
+
   Map<String,String> info ={
-    "city":first.locality,"lat":position.latitude.toString(),"lng":position.longitude.toString(),"radius":"5"};
+    "city":first.locality,/*"lat":position.latitude.toString(),"lng":position.longitude.toString(),*/"radius":"5"};
 
   return info;
 }

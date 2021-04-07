@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:inveat/data/place_service.dart' as PlaceService;
+import 'package:inveat/models/address_post.dart';
 import 'package:inveat/models/file_model.dart';
 import 'package:inveat/utilities/constants/colors.dart';
 import 'package:storage_path/storage_path.dart';
@@ -32,32 +33,38 @@ class _PostSelectionState extends State<PostSelection> {
   PageController _controller = PageController(
     initialPage: 0,
   );
-  String caption;
-  String title;
+  String _caption;
+  String _title;
+  Address _address;
 
   bool isTitleError=false;
   bool isCaptionError=false;
+  bool isAddressLoaded=false;
 
   void SharePost() async {
-    print(caption);
-    print(title);
-    if(caption==null||caption.isEmpty){
+    print(_address.toJson());
+    print(_caption);
+    print(_title);
+    if(_caption==null||_caption.isEmpty){
       setState(() {
         isCaptionError=true;
       });
     }
-    if(title==null||title.isEmpty){
+    if(_title==null||_title.isEmpty){
       setState(() {
         isTitleError=true;
       });
     }
     else {
       EasyLoading.show(status: 'loading...');
-      Map<String, String> form = {
-        'content': caption,
-        'title': title,
-        'type': 'image'
+      print(_address.toJson());
+      Map<String, dynamic> form = {
+        'content': _caption,
+        'title': _title,
+        'type': 'image',
+        'address':_address.toJson(),
       };
+
       final post_res = await PostService.AddPost(File(image), form);
       EasyLoading.dismiss();
       if(post_res!=null){
@@ -87,8 +94,19 @@ class _PostSelectionState extends State<PostSelection> {
       currentIndex = index;
     });
   }
+  Future<Address>_getAddress() async{
+    final tmp=await PlaceService.GetAddress();
+    setState((){
+      _address=tmp;
+    });
+    if(_address!=null){
+      setState(() {
+        isAddressLoaded=true;
+      });
+    }
+    return _address;
+  }
   Future<File> CompressAndGetFile(File file, String targetPath) async {
-    print("testCompressAndGetFile");
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
@@ -106,16 +124,6 @@ class _PostSelectionState extends State<PostSelection> {
     var images = jsonDecode(imagePath) as List;
 
     files = images.map<FileModel>((e) => FileModel.fromJson(e)).toList();
-
-    /*final dir = await path_provider.getTemporaryDirectory();
-
-      for(int i=0 ;i<files.length;i++ ){
-        for(int j=0 ;j<files[i].files.length;j++ ){
-            final targetPath = dir.absolute.path + "/file"+i.toString()+j.toString()+".jpg";
-            await CompressAndGetFile(File(files[i].files[j]), targetPath);
-            files[i].files[j]=targetPath;
-        }
-      }*/
 
     if (files != null && files.length > 0)
       setState(() {
@@ -254,13 +262,16 @@ class _PostSelectionState extends State<PostSelection> {
                 child: Text(
                   'Share',
                   style: GoogleFonts.nunito(
-                    color: Colors.white,
+                    color: isAddressLoaded?Colors.white:Colors.white.withOpacity(0.1),
                     fontSize: 20.0,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 onPressed: () {
-                  SharePost();
+                  if(isAddressLoaded)
+                    {
+                      SharePost();
+                    }
                 },
               ),
             ],
@@ -302,7 +313,7 @@ class _PostSelectionState extends State<PostSelection> {
                                 setState(() {
                                   captionLength = text.length;
                                 });
-                                caption = text;
+                                _caption = text;
                                 isCaptionError=false;
 
                               },
@@ -389,7 +400,7 @@ class _PostSelectionState extends State<PostSelection> {
                           ),
                           child: TextField(
                             onChanged: (text) {
-                              title = text;
+                              _title = text;
                               isTitleError=false;
                             },
                             maxLength: 30,
@@ -444,11 +455,11 @@ class _PostSelectionState extends State<PostSelection> {
                       ),
                       Expanded(
                           flex: 6,
-                          child: FutureBuilder<String>(
-                            future: PlaceService.GetAddress(),
+                          child: FutureBuilder<Address>(
+                            future: _getAddress(),
                             builder: (context,snapshot){
                               return Text(
-                                snapshot.data.toString(),
+                                snapshot.data!=null?snapshot.data.city+","+snapshot.data.governerate+","+snapshot.data.country:"loading...",
                                 textAlign: TextAlign.start,
                                 overflow: TextOverflow.ellipsis,
                                 style: GoogleFonts.nunito(
