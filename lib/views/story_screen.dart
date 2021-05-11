@@ -236,8 +236,8 @@ class AnimatedBar extends StatelessWidget {
                 _buildContainer(
                   double.infinity,
                   position < currentIndex
-                      ? Colors.yellow
-                      : Colors.yellow.withOpacity(0.5),
+                      ? Colors.white70
+                      : Colors.white70.withOpacity(0.5),
                 ),
                 position == currentIndex
                     ? AnimatedBuilder(
@@ -245,7 +245,7 @@ class AnimatedBar extends StatelessWidget {
                   builder: (context, child) {
                     return _buildContainer(
                       constraints.maxWidth * animController.value,
-                      Colors.yellow,
+                      Colors.white70,
                     );
                   },
                 )

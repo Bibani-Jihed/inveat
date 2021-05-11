@@ -24,30 +24,8 @@ class Profile extends StatefulWidget {
   _ProfileState createState() => _ProfileState();
 }
 
-class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
-  List<String> imageList = [
-    'https://cdn.pixabay.com/photo/2014/11/05/15/57/salmon-518032_1280.jpg',
-    'https://cdn.pixabay.com/photo/2015/09/02/12/43/meal-918639_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/03/09/15/30/breakfast-1246686_1280.jpg',
-    'https://cdn.pixabay.com/photo/2018/07/18/19/12/spaghetti-3547078_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/01/22/02/13/meat-1155132_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/11/18/19/00/breads-1836411_960_720.jpg',
-    'https://cdn.pixabay.com/photo/2017/03/27/13/54/bread-2178874_1280.jpg',
-    'https://cdn.pixabay.com/photo/2016/03/09/12/07/dinner-1246287_1280.jpg',
-  ];
-  List<String> captions = [
-    'Whatever is good for your soul, do that',
-    null,
-    'Even the stars were jealous of the sparkle in her eyes',
-    'Stress less and enjoy the best',
-    null,
-    'Get out there and live a little ',
-    'I’m not high maintenance, you’re just low effort',
-    'Life is better when you’re laughing',
-    null,
-    'Look for the magic in every moment',
-    'A sass a day keeps the basics away',
-  ];
+class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin,AutomaticKeepAliveClientMixin<Profile> {
+  
   TabController _tabController;
   int _tabIndex = 0;
 
@@ -134,349 +112,359 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     );
   }
 
-  Widget buildInfoView(User user) {
-    return SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
-      child: Container(
-        padding: EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.centerLeft,
-              height: 60.0,
-              child: TextField(
-                readOnly: true,
-                controller: TextEditingController(text: user==null?'':user.first_name),
-                keyboardType: TextInputType.text,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.w700),
-                decoration: InputDecoration(
-                  hintText: "Enter your firstname",
-                  labelText: "Firstname",
-                  hintStyle: GoogleFonts.nunito(
-                      color: Colors.white70, fontWeight: FontWeight.w700),
-                  labelStyle: new TextStyle(color: Colors.yellow),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
+  Widget buildInfoView() {
+    return FutureBuilder<User>(
+        future: UserService.GetCurrentUser(),
+        builder: (context, snapshot) {
+          return SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Container(
+              padding: EdgeInsets.all(20.0),
+              child: Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    height: 60.0,
+                    child: TextField(
+                      readOnly: true,
+                      controller: TextEditingController(text: snapshot.data==null?'':snapshot.data.first_name),
+                      keyboardType: TextInputType.text,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                      decoration: InputDecoration(
+                        hintText: "Enter your firstname",
+                        labelText: "Firstname",
+                        hintStyle: GoogleFonts.nunito(
+                            color: Colors.white70, fontWeight: FontWeight.w700),
+                        labelStyle: new TextStyle(color: Colors.yellow),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                      ),
+                    ),
                   ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    height: 60.0,
+                    child: TextField(
+                      readOnly: true,
+                      controller: TextEditingController(text: snapshot.data!=null?snapshot.data.last_name:""),
+                      keyboardType: TextInputType.text,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                      decoration: InputDecoration(
+                        hintText: "Enter your lastname",
+                        labelText: "Lastname",
+                        hintStyle: GoogleFonts.nunito(
+                            color: Colors.white70, fontWeight: FontWeight.w700),
+                        labelStyle: new TextStyle(color: Colors.yellow),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    height: 60.0,
+                    child: TextField(
+                      readOnly: true,
+                      controller: TextEditingController(text:snapshot.data!=null?snapshot.data.email:""),
+                      keyboardType: TextInputType.emailAddress,
+                      style: GoogleFonts.nunito(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                      decoration: InputDecoration(
+                        hintText: "Enter your email",
+                        labelText: "Email",
+                        hintStyle: GoogleFonts.nunito(
+                            color: Colors.white70, fontWeight: FontWeight.w700),
+                        labelStyle: new TextStyle(color: Colors.yellow),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.yellow),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30.0,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.0,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PersonalInfoScreen()),
+                        );
+                      },
+                      child: Text(
+                        'Edit Profile',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        primary: MColors.black,
+                        onPrimary: MColors.mc_start,
+                        side: BorderSide(width: 2.0, color: Colors.white),
+                        shape: new RoundedRectangleBorder(
+                            borderRadius: new BorderRadius.circular(20.0)),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            Container(
-              alignment: Alignment.centerLeft,
-              height: 60.0,
-              child: TextField(
-                readOnly: true,
-                controller: TextEditingController(text: user!=null?user.last_name:""),
-                keyboardType: TextInputType.text,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.w700),
-                decoration: InputDecoration(
-                  hintText: "Enter your lastname",
-                  labelText: "Lastname",
-                  hintStyle: GoogleFonts.nunito(
-                      color: Colors.white70, fontWeight: FontWeight.w700),
-                  labelStyle: new TextStyle(color: Colors.yellow),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
-                  ),
-                ),
-              ),
-            ),
-            Container(
-              alignment: Alignment.centerLeft,
-              height: 60.0,
-              child: TextField(
-                readOnly: true,
-                controller: TextEditingController(text:user!=null?user.email:""),
-                keyboardType: TextInputType.emailAddress,
-                style: GoogleFonts.nunito(
-                    color: Colors.white, fontWeight: FontWeight.w700),
-                decoration: InputDecoration(
-                  hintText: "Enter your email",
-                  labelText: "Email",
-                  hintStyle: GoogleFonts.nunito(
-                      color: Colors.white70, fontWeight: FontWeight.w700),
-                  labelStyle: new TextStyle(color: Colors.yellow),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.yellow),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(
-              height: 30.0,
-            ),
-            SizedBox(
-              width: double.infinity,
-              height: 50.0,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => PersonalInfoScreen()),
-                  );
-                },
-                child: Text(
-                  'Edit Profile',
-                  style: GoogleFonts.nunito(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  primary: MColors.black,
-                  onPrimary: MColors.mc_start,
-                  side: BorderSide(width: 2.0, color: Colors.white),
-                  shape: new RoundedRectangleBorder(
-                      borderRadius: new BorderRadius.circular(20.0)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
+
   }
 
-  Widget buildPageView(User user) {
+  Widget buildPageView() {
     return PageView(
       controller: _pageController,
       onPageChanged: (index) {
         changePage(index);
       },
-      children: <Widget>[buildFeedView(), buildInfoView(user)],
+      children: <Widget>[buildFeedView(), buildInfoView()],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<User>(
-        future: UserService.GetCurrentUser(),
-        builder: (context, snapshot) {
-          return Scaffold(
-              body: new GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).requestFocus(new FocusNode());
-                },
-                child: Stack(children: <Widget>[
+    return Scaffold(
+        body: new GestureDetector(
+          onTap: () {
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: Stack(children: <Widget>[
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: MColors.black,
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: 10.0,
+                vertical: 40.0,
+              ),
+              child: Column(
+                children: [
                   Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: MColors.black,
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 40.0,
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          margin: EdgeInsets.only(
-                              left: 14.0, right: 14.0, bottom: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Spacer(),
-                              SizedBox(
-                                height: 40.0,
-                                width: 40.0,
-                                child: IconButton(
-                                  icon: Icon(
-                                    Icons.more_horiz,
-                                    color: Colors.white,
-                                    size: 30,
-                                  ),
-                                  iconSize: 40.0,
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                        builder: (context) => SettingsScreen()));
-                                  },
-                                ),
-                              ),
-                            ],
+                    margin: EdgeInsets.only(
+                        left: 14.0, right: 14.0, bottom: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        Spacer(),
+                        SizedBox(
+                          height: 40.0,
+                          width: 40.0,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.more_vert,
+                              color: Colors.white,
+                              size: 30,
+                            ),
+                            iconSize: 40.0,
+                            onPressed: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SettingsScreen()));
+                            },
                           ),
                         ),
-                        Expanded(
-                          child: NestedScrollView(
-                            physics: NeverScrollableScrollPhysics(),
-                            headerSliverBuilder: (context, isScolled) {
-                              return [
-                                SliverAppBar(
-                                  backgroundColor: MColors.black,
-                                  collapsedHeight: 225,
-                                  expandedHeight: 225,
-                                  flexibleSpace: Container(
-                                    child: Column(children: <Widget>[
-                                      StoryButton(
-                                        size: 140,
-                                        onPressed: () {},
-                                        child: CachedNetworkImage(
-                                          imageUrl: snapshot.data!=null?api.BASE_URL+snapshot.data.image_user.url:api.IMAGE_PLACEHODER,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => new CircularProgressIndicator(),
-                                          width: 125,
-                                          height: 125,
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: NestedScrollView(
+                      physics: NeverScrollableScrollPhysics(),
+                      headerSliverBuilder: (context, isScolled) {
+                        return [
+                          SliverAppBar(
+                            backgroundColor: MColors.black,
+                            collapsedHeight: 225,
+                            expandedHeight: 225,
+                            flexibleSpace:
+                            FutureBuilder<User>(
+                                future: UserService.GetCurrentUser(),
+                                builder: (context, snapshot) {
+                                    return Container(
+                                      child: Column(children: <Widget>[
+                                        StoryButton(
+                                          size: 140,
+                                          onPressed: () {},
+                                          child: CachedNetworkImage(
+                                            imageUrl: snapshot.data!=null?api.BASE_URL+snapshot.data.image_user.url:api.IMAGE_PLACEHODER,
+                                            fit: BoxFit.cover,
+                                            placeholder: (context, url) => new CircularProgressIndicator(),
+                                            width: 125,
+                                            height: 125,
+                                            errorWidget: (context, url, error) =>
+                                                Icon(Icons.error),
+                                          ),
+                                          strokeWidth: 1.5,
+                                          radius: 120,
+                                          gradient: LinearGradient(
+                                            begin: Alignment.topRight,
+                                            end: Alignment.bottomLeft,
+                                            colors: [
+                                              Colors.yellow,
+                                              Colors.orange,
+                                            ],
+                                          ),
                                         ),
-                                        strokeWidth: 1.5,
-                                        radius: 120,
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topRight,
-                                          end: Alignment.bottomLeft,
-                                          colors: [
-                                            Colors.yellow,
-                                            Colors.orange,
-                                          ],
+                                        Text(
+                                          snapshot.data!=null?(snapshot.data.first_name + ' ' + snapshot.data.last_name):'',
+                                          style: GoogleFonts.nunito(
+                                            color: Colors.white,
+                                            fontSize: 30.0,
+                                            fontWeight: FontWeight.w900,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        snapshot.data!=null?(snapshot.data.first_name + ' ' + snapshot.data.last_name):'',
-                                        style: GoogleFonts.nunito(
-                                          color: Colors.white,
-                                          fontSize: 30.0,
-                                          fontWeight: FontWeight.w900,
+                                        SizedBox(
+                                          height: 20.0,
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 20.0,
-                                      ),
-                                      Container(
-                                        child: Row(children: <Widget>[
-                                          Expanded(
-                                            flex: 1,
-                                            child: Column(
-                                              children: [
-                                                FutureBuilder(
-                                                    future:_getUserPosts(),
-                                                    builder: (context,snapshot){
-                                                  return Text(
-                                                    snapshot.data!=null?snapshot.data.length.toString():"0",
+                                        Container(
+                                          child: Row(children: <Widget>[
+                                            Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                children: [
+                                                  FutureBuilder(
+                                                      future:_getUserPosts(),
+                                                      builder: (context,snapshot){
+                                                        return Text(
+                                                          snapshot.data!=null?snapshot.data.length.toString():"0",
+                                                          style: GoogleFonts.nunito(
+                                                            color: Colors.white,
+                                                            fontSize: 20.0,
+                                                            fontWeight: FontWeight.w700,
+                                                          ),
+                                                        );
+                                                      }),
+                                                  Text(
+                                                    "Posts",
+                                                    style: GoogleFonts.nunito(
+                                                      color: Colors.white70,
+                                                      fontSize: 15.0,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    "73.3k",
                                                     style: GoogleFonts.nunito(
                                                       color: Colors.white,
                                                       fontSize: 20.0,
                                                       fontWeight: FontWeight.w700,
                                                     ),
-                                                  );
-                                                }),
-                                                Text(
-                                                  "Posts",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white70,
-                                                    fontSize: 15.0,
-                                                    fontWeight: FontWeight.w500,
                                                   ),
-                                                ),
-                                              ],
+                                                  Text(
+                                                    "Followers",
+                                                    style: GoogleFonts.nunito(
+                                                      color: Colors.white70,
+                                                      fontSize: 15.0,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          Expanded(
-                                            flex: 1,
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  "73.3k",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white,
-                                                    fontSize: 20.0,
-                                                    fontWeight: FontWeight.w700,
+                                            Expanded(
+                                              flex: 1,
+                                              child: Column(
+                                                children: [
+                                                  Text(
+                                                    "21",
+                                                    style: GoogleFonts.nunito(
+                                                      color: Colors.white,
+                                                      fontSize: 20.0,
+                                                      fontWeight: FontWeight.w700,
+                                                    ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  "Followers",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white70,
-                                                    fontSize: 15.0,
-                                                    fontWeight: FontWeight.w500,
+                                                  Text(
+                                                    "Following",
+                                                    style: GoogleFonts.nunito(
+                                                      color: Colors.white70,
+                                                      fontSize: 15.0,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                          Expanded(
-                                            flex: 1,
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                  "21",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white,
-                                                    fontSize: 20.0,
-                                                    fontWeight: FontWeight.w700,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  "Following",
-                                                  style: GoogleFonts.nunito(
-                                                    color: Colors.white70,
-                                                    fontSize: 15.0,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ]),
-                                      ),
-                                    ]),
-                                  ),
-                                ),
-                                SliverPersistentHeader(
-                                  delegate: MyDelegate(TabBar(
-                                    onTap: (index) {
-                                      changePage(index);
-                                    },
-                                    controller: _tabController,
-                                    tabs: [
-                                      Tab(text: "Feed"),
-                                      Tab(text: "Info"),
-                                    ],
-                                    indicator: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        12.0,
-                                      ),
-                                      color: Colors.yellow,
-                                    ),
-                                    labelColor: MColors.black,
-                                    labelStyle: GoogleFonts.nunito(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w800,
-                                    ),
-                                    unselectedLabelColor: Colors.yellow,
-                                  )),
-                                  floating: true,
-                                  pinned: true,
-                                )
-                              ];
-                            },
-                            body: buildPageView(snapshot.data),
+                                          ]),
+                                        ),
+                                      ]),
+                                    );
+                                }),
+
+
                           ),
-                        )
-                      ],
+                          SliverPersistentHeader(
+                            delegate: MyDelegate(TabBar(
+                              onTap: (index) {
+                                changePage(index);
+                              },
+                              controller: _tabController,
+                              tabs: [
+                                Tab(text: "Feed"),
+                                Tab(text: "Info"),
+                              ],
+                              indicator: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                  12.0,
+                                ),
+                                color: Colors.yellow,
+                              ),
+                              labelColor: MColors.black,
+                              labelStyle: GoogleFonts.nunito(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              unselectedLabelColor: Colors.yellow,
+                            )),
+                            floating: true,
+                            pinned: true,
+                          )
+                        ];
+                      },
+                      body: buildPageView(),
                     ),
                   )
-
-                ]),
-              ));
-        });
+                ],
+              ),
+            )
+          ]),
+        ));
   }
+  @override
+  bool get wantKeepAlive => true;
+
 }
 
 class MyDelegate extends SliverPersistentHeaderDelegate {

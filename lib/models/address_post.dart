@@ -8,8 +8,8 @@ class Address {
   String country;
   String governerate;
   String street;
-  int street_number;
-  int zip_code;
+  String street_number;
+  String zip_code;
   double latitude;
   double longitude;
 
@@ -32,8 +32,8 @@ class Address {
       country: json['country'],
       governerate: json['governerate'],
       street: json['street'],
-      street_number: json['street_number'],
-      zip_code: json['zip_code'],
+      street_number: json['street_number'].toString(),
+      zip_code: json['zip_code'].toString(),
       latitude: json['latitude'],
       longitude: json['longitude'],
 

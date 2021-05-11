@@ -6,9 +6,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:inveat/lib/utilities/constants/colors.dart'
     as mColors;
 import 'package:inveat/utilities/constants/strings.dart' as Strings;
+import 'package:inveat/views/forget_password.dart';
 import 'package:inveat/views/signup_screen.dart';
 import 'package:inveat/views/widgets/complete_profile_widget.dart';
 import 'package:liquid_swipe/liquid_swipe.dart';
+import 'package:lottie/lottie.dart';
+import 'package:toast/toast.dart';
 import 'navigation_screen.dart';
 import 'package:inveat/data/user_service.dart' as UserService;
 import 'package:inveat/utilities/helpers/email_validator.dart' as Validator;
@@ -28,6 +31,7 @@ class _LoginState extends State<Login> {
   final TextEditingController controller = TextEditingController();
   LiquidController liquidController;
   int page = 0;
+
 
 
 
@@ -58,9 +62,10 @@ class _LoginState extends State<Login> {
       setState(() {
         isFieldError=true;
       });
+      Toast.show("Incorrect email or password", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
     }
   }
-  /********** Building View ***********/
+  /********** Building Widgets ***********/
   Widget _buildEmailTF() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +201,125 @@ class _LoginState extends State<Login> {
       ),
     );
   }
-  /********** Building View ***********/
+  /********** Building Widgets ***********/
+
+
+
+  /********** Building Login View Pages  ***********/
+  Widget _buildMainLoginView(){
+    return Container(
+      height: double.infinity,
+      child: SingleChildScrollView(
+        physics: AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.0,
+          vertical: 60.0,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            SizedBox(height: 50.0),
+            Container(
+              padding: EdgeInsets.only(left: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    Strings.LETS_SIGN_YOU_IN,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white,
+                      fontSize: 30.0,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.left,
+                  ), //Lets Sign
+                  Text(
+                    Strings.WELCOME_BACK,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ), //Welcome
+                  Text(
+                    Strings.YOUVE_BEEN_MISSED,
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                ],
+              ),
+            ), //You've been Missed
+            SizedBox(height: 40.0),
+            _buildEmailTF(),
+            SizedBox(height: 8.0),
+            _buildPasswordTF(),
+            SizedBox(height: 8.0),
+            Align(
+              alignment: Alignment.center,
+              child:
+              GestureDetector(
+                child: Text(
+                  "Forget password?",
+                  style: GoogleFonts.nunito(
+                    color: Colors.white,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ForgetPassword()),
+                  );
+                },
+              )
+
+            ),
+            SizedBox(height: 80.0),
+            _buildSigninButton(),
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Don\'t have an account?',
+                    style: GoogleFonts.nunito(
+                      color: Colors.white70,
+                      fontSize: 15.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => Signup()),
+                        );
+                      },
+                      child: Text(
+                        'Sign up',
+                        style: GoogleFonts.nunito(
+                          color: Colors.white,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      )),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  /********** Building Login View Pages  ***********/
+
+  /********** Building Main Pager View   ***********/
   Widget _buildLoginView(){
     return Stack(
       children: <Widget>[
@@ -207,110 +330,14 @@ class _LoginState extends State<Login> {
             color: mColors.black,
           ),
         ),
-        Container(
-          height: double.infinity,
-          child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            padding: EdgeInsets.symmetric(
-              horizontal: 20.0,
-              vertical: 60.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(height: 50.0),
-                Container(
-                  padding: EdgeInsets.only(left: 10.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        Strings.LETS_SIGN_YOU_IN,
-                        style: GoogleFonts.nunito(
-                          color: Colors.white,
-                          fontSize: 30.0,
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.left,
-                      ), //Lets Sign
-                      Text(
-                        Strings.WELCOME_BACK,
-                        style: GoogleFonts.nunito(
-                          color: Colors.white70,
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ), //Welcome
-                      Text(
-                        Strings.YOUVE_BEEN_MISSED,
-                        style: GoogleFonts.nunito(
-                          color: Colors.white70,
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      )
-                    ],
-                  ),
-                ), //You've been Missed
-                SizedBox(height: 40.0),
-                _buildEmailTF(),
-                SizedBox(height: 8.0),
-                _buildPasswordTF(),
-                SizedBox(height: 8.0),
-                Align(
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Forget password?",
-                    style: GoogleFonts.nunito(
-                      color: Colors.white,
-                      fontSize: 15.0,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 80.0),
-                _buildSigninButton(),
-                Container(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Don\'t have an account?',
-                        style: GoogleFonts.nunito(
-                          color: Colors.white70,
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Signup()),
-                            );
-                          },
-                          child: Text(
-                            'Sign up',
-                            style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          )),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        _buildMainLoginView(),
       ],
     );
   }
   Widget _buildAccountInfoView() {
     return CompleteProfile();
   }
+  /********** Building Pager View  ***********/
 
   pageChangeCallback(int lpage) {
     setState(() {

@@ -8,26 +8,28 @@ import 'package:inveat/data/place_service.dart' as PlaceService;
 import 'package:inveat/models/address_post.dart';
 import 'package:inveat/models/file_model.dart';
 import 'package:inveat/utilities/constants/colors.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:storage_path/storage_path.dart';
 import 'package:inveat/data/post_service.dart' as PostService;
 import 'package:toast/toast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
+import 'login_screen.dart';
+
 
 class PostSelection extends StatefulWidget {
-  PostSelection({Key key, this.title}) : super(key: key);
+  final VoidCallback  callback;
+  List<String> files;
+  PostSelection({this.callback,this.files});
 
-  final String title;
 
   @override
   _PostSelectionState createState() => _PostSelectionState();
 }
 
 class _PostSelectionState extends State<PostSelection> {
-  List<FileModel> files;
-  FileModel selectedModel;
-  String image;
   int currentIndex;
   int captionLength;
   PageController _controller = PageController(
@@ -40,38 +42,97 @@ class _PostSelectionState extends State<PostSelection> {
   bool isTitleError=false;
   bool isCaptionError=false;
   bool isAddressLoaded=false;
+  int items_number=12;
 
-  void SharePost() async {
-    print(_address.toJson());
-    print(_caption);
-    print(_title);
-    if(_caption==null||_caption.isEmpty){
-      setState(() {
-        isCaptionError=true;
-      });
-    }
-    if(_title==null||_title.isEmpty){
-      setState(() {
-        isTitleError=true;
-      });
-    }
-    else {
-      EasyLoading.show(status: 'loading...');
+
+  void SharePost(files) async {
+
+
       print(_address.toJson());
-      Map<String, dynamic> form = {
-        'content': _caption,
-        'title': _title,
-        'type': 'image',
-        'address':_address.toJson(),
-      };
-
-      final post_res = await PostService.AddPost(File(image), form);
-      EasyLoading.dismiss();
-      if(post_res!=null){
-        Navigator.pop(context);
-      }else{
-        Toast.show("error occurred, please try again", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+      print(_caption);
+      print(_title);
+      if (_caption == null || _caption.isEmpty) {
+        setState(() {
+          isCaptionError = true;
+        });
       }
+      if (_title == null || _title.isEmpty) {
+        setState(() {
+          isTitleError = true;
+        });
+      }
+      else {
+        EasyLoading.show(status: 'loading...');
+        print(_address.toJson());
+        Map<String, dynamic> form = {
+          'content': _caption,
+          'title': _title,
+          'type': 'image',
+          'address': _address.toJson(),
+        };
+
+        final post_res =await PostService.AddPost(files, form);
+        EasyLoading.dismiss();
+
+        if (post_res == -1) {
+          Alert(
+            context: context,
+            type: AlertType.warning,
+            title: "Session expired",
+            style: AlertStyle(
+              isOverlayTapDismiss: false,
+              descStyle: GoogleFonts.nunito(
+                color: Colors.white,
+                fontSize: 15.0,
+                fontWeight: FontWeight.w600,
+              ),
+              descTextAlign: TextAlign.start,
+              animationDuration: Duration(milliseconds: 400),
+              backgroundColor: Colors.black,
+              alertBorder: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+                side: BorderSide(
+                  color: Colors.black,
+                ),
+              ),
+              titleStyle: GoogleFonts.nunito(
+                color: Colors.white,
+                fontSize: 15.0,
+                fontWeight: FontWeight.w600,
+              ),
+              alertAlignment: Alignment.center,
+            ),
+            desc: "Please login to continue...",
+            buttons: [
+              DialogButton(
+                child: Text(
+                  "Go",
+                  style: GoogleFonts.nunito(
+                    color: Colors.yellow,
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.right,
+                ),
+                onPressed: () {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) =>
+                          Login()), (Route<dynamic> route) => false);
+                },
+                color: Colors.black,
+              ),
+
+            ],
+          ).show();
+        }
+        else if (post_res != null) {
+          widget.callback();
+          //Navigator.pop(context);
+        } else {
+          Toast.show("error occurred, please try again", context,
+              duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+        }
+
     }
   }
 
@@ -84,7 +145,7 @@ class _PostSelectionState extends State<PostSelection> {
   @override
   void initState() {
     super.initState();
-    getImagesPath();
+    _getAddress();
     currentIndex = 0;
     captionLength = 0;
   }
@@ -94,141 +155,27 @@ class _PostSelectionState extends State<PostSelection> {
       currentIndex = index;
     });
   }
+
+
+
   Future<Address>_getAddress() async{
-    final tmp=await PlaceService.GetAddress();
-    setState((){
-      _address=tmp;
+    if(_address==null) {
+      final tmp = await PlaceService.GetAddress();
+    setState(() {
+    _address=tmp;
     });
-    if(_address!=null){
-      setState(() {
-        isAddressLoaded=true;
-      });
+      if (_address != null) {
+        setState(() {
+          isAddressLoaded = true;
+        });
+      }
     }
     return _address;
   }
-  Future<File> CompressAndGetFile(File file, String targetPath) async {
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 20,
-    );
 
-    print(file.lengthSync());
-    print(result?.lengthSync());
-
-    return result;
-  }
-
-  getImagesPath() async {
-    var imagePath = await StoragePath.imagesPath;
-    var images = jsonDecode(imagePath) as List;
-
-    files = images.map<FileModel>((e) => FileModel.fromJson(e)).toList();
-
-    if (files != null && files.length > 0)
-      setState(() {
-        selectedModel = files[0];
-        image = files[0].files[0];
-      });
-  }
-
-  Widget _buildImagePicker() {
-    return Container(
-      padding: EdgeInsets.only(top: 20.0),
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Row(
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.clear),
-                    color: Colors.white,
-                    iconSize: 25.0,
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  SizedBox(width: 10),
-                  DropdownButtonHideUnderline(
-                      child: DropdownButton<FileModel>(
-                    dropdownColor: MColors.black,
-                    items: getItems(),
-                    onChanged: (FileModel d) {
-                      assert(d.files.length > 0);
-                      image = d.files[0];
-                      setState(() {
-                        selectedModel = d;
-                      });
-                    },
-                    value: selectedModel,
-                  ))
-                ],
-              ),
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextButton(
-                    child: Text(
-                      'Next',
-                      style: GoogleFonts.nunito(
-                        color: Colors.white,
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        changePage(1);
-                        _controller.animateToPage(1,
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.ease);
-                      });
-                    },
-                  ))
-            ],
-          ),
-          Divider(),
-          Container(
-              height: MediaQuery.of(context).size.height * 0.45,
-              child: image != null
-                  ? Image.file(File(image),
-                      height: MediaQuery.of(context).size.height * 0.45,
-                      width: MediaQuery.of(context).size.width)
-                  : Container()),
-          Divider(),
-
-          selectedModel == null
-              ? Container()
-              : Container(
-                  height: MediaQuery.of(context).size.height * 0.38,
-                  child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          crossAxisSpacing: 4,
-                          mainAxisSpacing: 4),
-                      itemBuilder: (_, i) {
-                        var file = selectedModel.files[i];
-                        return GestureDetector(
-                          child: Image.file(
-                            File(file),
-                            fit: BoxFit.cover,
-                          ),
-                          onTap: () {
-                            setState(() {
-                              image = file;
-                            });
-                          },
-                        );
-                      },
-                      itemCount: selectedModel.files.length),
-                )
-        ],
-      ),
-    );
-  }
 
   Widget _buildPostInfo() {
+    print("length fies: "+widget.files.length.toString());
     return SingleChildScrollView(
         child: Container(
       padding: EdgeInsets.only(top: 24.0),
@@ -239,23 +186,9 @@ class _PostSelectionState extends State<PostSelection> {
               IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () {
-                  setState(() {
-                    changePage(0);
-                    _controller.animateToPage(0,
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.ease);
-                  });
+                  Navigator.pop(context);
                 },
                 color: Colors.white,
-              ),
-              Text(
-                "Back",
-                textAlign: TextAlign.start,
-                style: GoogleFonts.nunito(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w800,
-                ),
               ),
               Spacer(),
               TextButton(
@@ -270,7 +203,8 @@ class _PostSelectionState extends State<PostSelection> {
                 onPressed: () {
                   if(isAddressLoaded)
                     {
-                      SharePost();
+                      SharePost(widget.files);
+
                     }
                 },
               ),
@@ -293,7 +227,7 @@ class _PostSelectionState extends State<PostSelection> {
                             width: 80,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(10.0),
-                              child: image!=null?Image.file(File(image), fit: BoxFit.cover):null,
+                              child: widget.files.isNotEmpty?Image.file(File(widget.files[widget.files.length-1]), fit: BoxFit.cover):null,
                             ),
                           ),
                           Spacer(),
@@ -455,21 +389,16 @@ class _PostSelectionState extends State<PostSelection> {
                       ),
                       Expanded(
                           flex: 6,
-                          child: FutureBuilder<Address>(
-                            future: _getAddress(),
-                            builder: (context,snapshot){
-                              return Text(
-                                snapshot.data!=null?snapshot.data.city+","+snapshot.data.governerate+","+snapshot.data.country:"loading...",
-                                textAlign: TextAlign.start,
-                                overflow: TextOverflow.ellipsis,
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 15.0,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              );
-                            },
-                          )
+                          child: Text(
+                            _address!=null?_address.city+","+_address.governerate+","+_address.country:"loading...",
+                            textAlign: TextAlign.start,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.nunito(
+                              color: Colors.white,
+                              fontSize: 15.0,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
 
 
                       )
@@ -546,40 +475,19 @@ class _PostSelectionState extends State<PostSelection> {
               color: MColors.black,
             ),
           ),
-          PageView(
+         PageView(
               controller: _controller,
               onPageChanged: (index) {
                 changePage(index);
               },
               physics: new NeverScrollableScrollPhysics(),
               children: <Widget>[
-                _buildImagePicker(),
                 _buildPostInfo(),
+                //_buildImagePicker(),
               ])
         ]),
       ),
     );
   }
 
-  List<DropdownMenuItem> getItems() {
-    try {
-      return files
-          .map((e) =>
-          DropdownMenuItem(
-            child: Text(
-              e.folder,
-              style: GoogleFonts.nunito(
-                color: Colors.white,
-                fontSize: 15.0,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            value: e,
-          ))
-          .toList() ??
-          [];
-    }catch(e){
-
-    }
-  }
 }

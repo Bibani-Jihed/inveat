@@ -14,6 +14,9 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+
+
+  var _home,_profile;
   int currentIndex;
   PageController _controller = PageController(
     initialPage: 0,
@@ -32,8 +35,8 @@ class _NavigationState extends State<Navigation> {
         changePage(index);
       },
       children: <Widget>[
-        Home(),
-        Profile(),
+        this.HomePage(),
+        this.ProfilePage(),
       ],
     );
   }
@@ -143,5 +146,14 @@ class _NavigationState extends State<Navigation> {
       )
 
     );
+  }
+
+  Widget HomePage(){
+    if (this._home == null) this._home = Home(controller: _controller,);
+    return this._home;
+  }
+  Widget ProfilePage(){
+    if (this._profile == null) this._profile = Profile();
+    return this._profile;
   }
 }

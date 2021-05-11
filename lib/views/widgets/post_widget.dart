@@ -5,42 +5,51 @@ import 'package:flutter_button/insta/story_button.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:inveat/models/comment_model.dart';
 import 'package:inveat/models/post_model.dart';
+import 'package:inveat/models/user_model.dart';
 import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/utilities/constants/api.dart' as api;
 import 'package:inveat/data/post_service.dart' as PostService;
 import 'package:inveat/data/user_service.dart' as UserService;
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:like_button/like_button.dart';
+import 'package:page_indicator/page_indicator.dart';
 import 'package:pinch_zoom_image_last/pinch_zoom_image_last.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:inveat/views/widgets/user_widget.dart';
+
 
 class PostWidget extends StatefulWidget {
-  Post  post;
-
-
+  Post post;
+  PageController controller;
   @override
   _PostWidgetState createState() => _PostWidgetState();
 
-   PostWidget({
+  PostWidget({
     this.post,
+    this.controller,
   });
 }
 
-class _PostWidgetState extends State<PostWidget> {
-
+class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
   @override
   void initState() {
+    super.initState();
   }
 
   String comment = '';
   bool isCommentError = false;
-  bool isLikedDefault =true;
-  final _commentController=TextEditingController();
+  bool isLikedDefault = true;
+  final _commentController = TextEditingController();
+  final pageController = PageController();
 
-  Future<void> _sendComment() async{
-    var tmp=comment;
-    _commentController.text="";
-    Map<String,String>form={"post_id":widget.post.id.toString(),"comment":tmp};
-    final comment_res=await PostService.AddComment(form);
+  Future<void> _sendComment() async {
+    var tmp = comment;
+    _commentController.text = "";
+    Map<String, String> form = {
+      "post_id": widget.post.id.toString(),
+      "comment": tmp
+    };
+    final comment_res = await PostService.AddComment(form);
     widget.post.comments.add(comment_res);
     FocusScope.of(context).requestFocus(FocusNode());
   }
@@ -118,21 +127,21 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildShowCommentsButton() {
-    if(widget.post.comments.length>0)
-    return Container(
-      padding: EdgeInsets.only(left: 8.0, right: 8.0),
-      child: GestureDetector(
-        onTap: () {
-          _buildCommentsView(context);
-        },
-        child: Text('View all ${widget.post.comments.length} comments',
-            style: GoogleFonts.nunito(
-              color: Colors.white.withOpacity(0.5),
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
-            )),
-      ),
-    );
+    if (widget.post.comments.length > 0)
+      return Container(
+        padding: EdgeInsets.only(left: 8.0, right: 8.0),
+        child: GestureDetector(
+          onTap: () {
+            _buildCommentsView(context);
+          },
+          child: Text('View all ${widget.post.comments.length} comments',
+              style: GoogleFonts.nunito(
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 14.0,
+                fontWeight: FontWeight.w500,
+              )),
+        ),
+      );
     return Container();
   }
 
@@ -184,8 +193,7 @@ class _PostWidgetState extends State<PostWidget> {
                 onPressed: () {
                   if (comment == null || comment.isEmpty) {
                     isCommentError = true;
-                  }else{
-
+                  } else {
                     _sendComment();
                   }
                 },
@@ -198,11 +206,13 @@ class _PostWidgetState extends State<PostWidget> {
   }
 
   Widget _buildCommentViewMainContent() {
-    if (widget.post.comments.length>0) {
+    if (widget.post.comments.length > 0) {
       return SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 70.0,),
+            SizedBox(
+              height: 70.0,
+            ),
             ListView.builder(
                 physics: ScrollPhysics(),
                 scrollDirection: Axis.vertical,
@@ -211,11 +221,13 @@ class _PostWidgetState extends State<PostWidget> {
                 itemBuilder: (context, index) {
                   return Container(
                     margin: EdgeInsets.only(left: 20, bottom: 5),
-                          child: _buildCommentItem(widget.post.comments[index],index),
-                    );
+                    child:
+                        _buildCommentItem(widget.post.comments[index], index),
+                  );
                 }),
-            SizedBox(height: 70.0,),
-
+            SizedBox(
+              height: 70.0,
+            ),
           ],
         ),
       );
@@ -315,382 +327,352 @@ class _PostWidgetState extends State<PostWidget> {
             ));
   }
 
-  Widget _buildCommentItem(Comment comment,int index) {
-    return Slidable(
-      actionPane: SlidableDrawerActionPane(),
-      actionExtentRatio: 0.25,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        width: MediaQuery.of(context).size.width,
-        child: Stack(
-          children: [
-            SizedBox(
-              width: 30.0,
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    StoryButton(
-                      size: 30,
-                      onPressed: () {},
-                      child: CachedNetworkImage(
-                        imageUrl: api.BASE_URL + comment.user.image_user.url,
-                        fit: BoxFit.cover,
-                        width: 25,
-                        height: 25,
-                        errorWidget: (context, url, error) => Icon(Icons.error),
-                      ),
-                      strokeWidth: 1.5,
-                      radius: 60,
-                      gradient: LinearGradient(
-                        begin: Alignment.topRight,
-                        end: Alignment.bottomLeft,
-                        colors: [
-                          Colors.yellow,
-                          Colors.orange,
-                        ],
-                      ),
+  Widget _buildCommentMainItem(Comment comment) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      width: MediaQuery.of(context).size.width,
+      child: Stack(
+        children: [
+          SizedBox(
+            width: 30.0,
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  StoryButton(
+                    size: 30,
+                    onPressed: () {},
+                    child: CachedNetworkImage(
+                      imageUrl: api.BASE_URL + comment.user.image_user.url,
+                      fit: BoxFit.cover,
+                      width: 25,
+                      height: 25,
+                      errorWidget: (context, url, error) => Icon(Icons.error),
                     ),
-                  ]),
-            ),
-            Container(
-              padding: EdgeInsets.only(left: 40.0),
-
-              child:
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Wrap(
-                  children: [
-                    if (widget.post.content != null)
-                      RichText(
-                          maxLines: null,
-                          text: TextSpan(
-                            style: new TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.white,
-                            ),
-                            children: <TextSpan>[
-                              new TextSpan(
-                                text: widget.post.user.first_name,
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              new TextSpan(text: '  '),
-                              new TextSpan(
-                                text:
-                                comment.comment,
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ))
-                  ],
-                ),
-                Text(
-                  _getTimeDifferenceFromNow(DateTime.parse(comment.created_at)),
-                  textAlign: TextAlign.start,
-                  style: GoogleFonts.nunito(
-                    color: Colors.white70,
-                    fontSize: 10.0,
-                    fontWeight: FontWeight.w200,
+                    strokeWidth: 1.5,
+                    radius: 60,
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
+                      colors: [
+                        Colors.yellow,
+                        Colors.orange,
+                      ],
+                    ),
                   ),
+                ]),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 40.0),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Wrap(
+                children: [
+                  if (widget.post.content != null)
+                    RichText(
+                        maxLines: null,
+                        text: TextSpan(
+                          style: new TextStyle(
+                            fontSize: 14.0,
+                            color: Colors.white,
+                          ),
+                          children: <TextSpan>[
+                            new TextSpan(
+                              text: comment.user.first_name +
+                                  " " +
+                                  comment.user.last_name,
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            new TextSpan(text: '  '),
+                            new TextSpan(
+                              text: comment.comment,
+                              style: GoogleFonts.nunito(
+                                color: Colors.white,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ))
+                ],
+              ),
+              Text(
+                _getTimeDifferenceFromNow(DateTime.parse(comment.created_at)),
+                textAlign: TextAlign.start,
+                style: GoogleFonts.nunito(
+                  color: Colors.white70,
+                  fontSize: 10.0,
+                  fontWeight: FontWeight.w200,
                 ),
-              ]),
-            ),
-          ],
-        ),
+              ),
+            ]),
+          ),
+        ],
       ),
-      secondaryActions: <Widget>[
-        IconSlideAction(
-          caption: 'Delete',
-          color: Colors.red,
-          icon: Icons.delete,
-          onTap: ()async{
-            final res_code=await PostService.RemoveComment(comment.id);
-            if(res_code==201){
-              setState(() {
-                widget.post.comments=List.from(widget.post.comments)
-                  ..removeAt(index);
-              });
-              Navigator.of(context).pop();
-            }
-          },
-        ),
-      ],
     );
-
   }
+
+  Widget _buildCommentItem(Comment comment, int index) {
+    return FutureBuilder<User>(
+        future: UserService.GetCurrentUser(),
+        builder: (context, snapshot) {
+          if (snapshot.data.id == widget.post.user.id ||
+              snapshot.data.id == comment.user.id) {
+            return Slidable(
+              actionPane: SlidableDrawerActionPane(),
+              actionExtentRatio: 0.25,
+              child: _buildCommentMainItem(comment),
+              secondaryActions: <Widget>[
+                IconSlideAction(
+                  caption: 'Delete',
+                  color: Colors.red,
+                  icon: Icons.delete,
+                  onTap: () async {
+                    final res_code =
+                        await PostService.RemoveComment(comment.id);
+                    if (res_code == 201) {
+                      setState(() {
+                        widget.post.comments = List.from(widget.post.comments)
+                          ..removeAt(index);
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+              ],
+            );
+          } else {
+            _buildCommentMainItem(comment);
+          }
+        });
+  }
+
   Future<bool> _isCurrentUserLiked() async {
-    final user=await UserService.GetCurrentUser();
-    for(var like in widget.post.likes){
-      if(like.user.id==user.id) return true;
+    final user = await UserService.GetCurrentUser();
+    for (var like in widget.post.likes) {
+      if (like.user.id == user.id) return true;
     }
     return false;
   }
-  Future<bool> onLikeButtonTapped(bool isLiked) async{
+
+  Future<bool> onLikeButtonTapped(bool isLiked) async {
     await PostService.LikeOrDislike(widget.post.id);
     return !isLiked;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(new FocusNode());
-      },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return SafeArea(
+      child: Stack(
         children: [
-          //Post Header
           Container(
-            child: Row(
+              child: GestureDetector(
+            onTap: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                //Post Header
+                UserWidget(user:widget.post.user,address_post:widget.post.address_post,controller: widget.controller,),
+                //Post Image
                 Container(
-                  child: Row(
+                    padding: EdgeInsets.all(5.0),
+                    constraints: BoxConstraints(minHeight: 100,maxHeight: 300),
+                    height: MediaQuery.of(context).size.height,
+                    alignment: Alignment.center,
+                    child: PageView.builder(
+                      controller: pageController,
+                      itemCount: widget.post.image_posts.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          alignment: Alignment.center,
+                          child: PinchZoomImage(
+                            image: CachedNetworkImage(
+                              fit: BoxFit.cover,
+                              imageUrl:
+                              api.BASE_URL + widget.post.image_posts[index].url,
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                    valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.yellow),
+                                  ),
+                              errorWidget: (context, url, error) =>
+                                  Icon(Icons.error),
+                            ),
+                            zoomedBackgroundColor:
+                            Color.fromRGBO(240, 240, 240, 1.0),
+                            hideStatusBarWhileZooming: true,
+                            onZoomStart: () {
+                              print('Zoom started');
+                            },
+                            onZoomEnd: () {
+                              print('Zoom finished');
+                            },
+                          ),
+                        );
+                    },)),
+                SizedBox(
+                  height: 10.0,
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 5.0),
+                  child: SingleChildScrollView(
+                    child:
+                    Stack(
+                      children: [
+                        Row(
+                            mainAxisAlignment: MainAxisAlignment.center, //Center Row contents horizontally,
+                            crossAxisAlignment: CrossAxisAlignment.center, //Center Row contents vertically,
+                          children: [
+                            widget.post.image_posts.length>1?
+                            SizedBox(
+                              height: 30,
+                              child: SmoothPageIndicator(
+                                controller: pageController,
+                                count: widget.post.image_posts.length,
+                                effect: WormEffect(
+                                    activeDotColor: Colors.yellow,
+                                    dotHeight: 7,
+                                    dotWidth: 7
+                                ),
+                              ),
+                            )
+                            :Container()
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            FutureBuilder(
+                                future: _isCurrentUserLiked(),
+                                builder: (context, snapshot) {
+                                  return LikeButton(
+                                    isLiked: snapshot.data,
+                                    onTap: onLikeButtonTapped,
+                                    size: 30,
+                                    circleColor: CircleColor(
+                                        start: Colors.yellow, end: Colors.yellow),
+                                    bubblesColor: BubblesColor(
+                                      dotPrimaryColor: Colors.yellow,
+                                      dotSecondaryColor: Colors.yellow,
+                                    ),
+                                    likeBuilder: (bool isLiked) {
+                                      return Icon(
+                                        Icons.whatshot,
+                                        color:
+                                        isLiked ? Colors.yellow : Colors.white,
+                                        size: 30,
+                                      );
+                                    },
+                                    likeCount: widget.post.likes.length,
+                                    countBuilder:
+                                        (int count, bool isLiked, String text) {
+                                      var color =
+                                      isLiked ? Colors.yellow : Colors.white;
+                                      Widget result;
+                                      if (count == 0) {
+                                        result = Text(
+                                          "0",
+                                          style: TextStyle(color: color),
+                                        );
+                                      } else
+                                        result = Text(
+                                          text,
+                                          style: TextStyle(color: color),
+                                        );
+                                      return result;
+                                    },
+                                  );
+                                }),
+                            SizedBox(
+                              width: 15.0,
+                            ),
+                            SizedBox(
+                                height: 25.0,
+                                width: 25.0,
+                                child: new IconButton(
+                                  padding: new EdgeInsets.all(0.0),
+                                  icon: Image.asset("assets/images/commentary.png"),
+                                  onPressed: () {
+                                    _buildCommentsView(context);
+                                  },
+                                )),
+                            Spacer(),
+                          ],
+                        ),
+                      ],
+                    )
+
+                  ),
+                ),
+                SizedBox(
+                  height: 5.0,
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                  child: Wrap(
                     children: [
-                      SizedBox(
-                        width: 50.0,
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              StoryButton(
-                                size: 40,
-                                onPressed: () {},
-                                child: CachedNetworkImage(
-                                  imageUrl: api.BASE_URL +
-                                      widget.post.user.image_user.url,
-                                  fit: BoxFit.cover,
-                                  width: 35,
-                                  height: 35,
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
-                                ),
-                                strokeWidth: 1.5,
-                                radius: 60,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topRight,
-                                  end: Alignment.bottomLeft,
-                                  colors: [
-                                    Colors.yellow,
-                                    Colors.orange,
-                                  ],
-                                ),
+                      if (widget.post.content != null)
+                        RichText(
+                            maxLines: null,
+                            text: TextSpan(
+                              style: new TextStyle(
+                                fontSize: 14.0,
+                                color: Colors.white,
                               ),
-                            ]),
-                      ),
-                      Container(
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.post.user.first_name!=null?widget.post.user.first_name+" "+widget.post.user.last_name:"",
-                                textAlign: TextAlign.start,
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w700,
+                              children: <TextSpan>[
+                                new TextSpan(
+                                  text: widget.post.user.first_name,
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                widget.post.address_post!=null?widget.post.address_post.city+","+widget.post.address_post.governerate+","+widget.post.address_post.country:"",
-                                textAlign: TextAlign.start,
-                                style: GoogleFonts.nunito(
-                                  color: Colors.white70,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w200,
+                                new TextSpan(text: '  '),
+                                new TextSpan(
+                                  text: widget.post.content,
+                                  style: GoogleFonts.nunito(
+                                    color: Colors.white,
+                                    fontSize: 14.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                            ]),
-                      ),
+                              ],
+                            ))
                     ],
                   ),
                 ),
-                Spacer(),
-                IconButton(
-                  icon: Icon(Icons.more_vert, color: Colors.white),
-                  iconSize: 20,
-                  onPressed: () {
-                    _buildSettingModalBottomSheet(context);
-                  },
+                SizedBox(
+                  height: 5,
                 ),
-              ],
-            ),
-          ),
-          //Post Image
-          Container(
-            padding: EdgeInsets.all(5.0),
-            child: Container(
-              constraints: BoxConstraints(minHeight: 100),
-              alignment: Alignment.center,
-              child: PinchZoomImage(
-                image: CachedNetworkImage(
-                  fit: BoxFit.cover,
-                  imageUrl: api.BASE_URL + widget.post.image_posts[0].url,
-                  progressIndicatorBuilder: (context, url, downloadProgress) =>
-                      CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.yellow),
-                  ),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                _buildShowCommentsButton(),
+                SizedBox(
+                  height: 5,
                 ),
-                zoomedBackgroundColor: Color.fromRGBO(240, 240, 240, 1.0),
-                hideStatusBarWhileZooming: true,
-                onZoomStart: () {
-                  print('Zoom started');
-                },
-                onZoomEnd: () {
-                  print('Zoom finished');
-                },
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 10.0,
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 5.0),
-            child: SingleChildScrollView(
-              child: Row(
-                children: [
-                  FutureBuilder(
-                      future: _isCurrentUserLiked(),
-                      builder: (context,snapshot){
-                        return LikeButton(
-                          isLiked: snapshot.data,
-                          onTap: onLikeButtonTapped,
-                          size: 30,
-                          circleColor:
-                          CircleColor(start: Colors.yellow, end: Colors.yellow),
-                          bubblesColor: BubblesColor(
-                            dotPrimaryColor: Colors.yellow,
-                            dotSecondaryColor: Colors.yellow,
-                          ),
-
-                          likeBuilder: (bool isLiked) {
-                            return Icon(
-                              Icons.whatshot,
-                              color: isLiked ? Colors.yellow : Colors.white,
-                              size: 30,
-                            );
-                          },
-                          likeCount: widget.post.likes.length,
-                          countBuilder: (int count, bool isLiked, String text) {
-                            var color = isLiked ? Colors.yellow : Colors.white;
-                            Widget result;
-                            if (count == 0) {
-                              result = Text(
-                                "0",
-                                style: TextStyle(color: color),
-                              );
-                            } else
-                              result = Text(
-                                text,
-                                style: TextStyle(color: color),
-                              );
-                            return result;
-                          },
-                        );
-                  }),
-                  SizedBox(
-                    width: 15.0,
-                  ),
-                  SizedBox(
-                      height: 25.0,
-                      width: 25.0,
-                      child: new IconButton(
-                        padding: new EdgeInsets.all(0.0),
-                        icon: Image.asset("assets/images/commentary.png"),
-                        onPressed: () {
-                          _buildCommentsView(context);
-                        },
+                Container(
+                  padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                  child: Text(
+                      _getTimeDifferenceFromNow(
+                          DateTime.parse(widget.post.created_at)),
+                      style: GoogleFonts.nunito(
+                        color: Colors.white.withOpacity(0.5),
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.w500,
                       )),
-                  Spacer(),
-                  /*LikeButton(
-                    size: 25,
-                    circleColor:
-                        CircleColor(start: Colors.yellow, end: Colors.yellow),
-                    bubblesColor: BubblesColor(
-                      dotPrimaryColor: Colors.yellow,
-                      dotSecondaryColor: Colors.yellow,
-                    ),
-                    likeBuilder: (bool isLiked) {
-                      return Image.asset(
-                        "assets/images/bookmark.png",
-                        color: isLiked ? Colors.yellow : Colors.white,
-                      );
-                    },
-                  ),*/
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 5.0,
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0),
-            child: Wrap(
-              children: [
-                if (widget.post.content != null)
-                  RichText(
-                      maxLines: null,
-                      text: TextSpan(
-                        style: new TextStyle(
-                          fontSize: 14.0,
-                          color: Colors.white,
-                        ),
-                        children: <TextSpan>[
-                          new TextSpan(
-                            text: widget.post.user.first_name,
-                            style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          new TextSpan(text: '  '),
-                          new TextSpan(
-                            text: widget.post.content,
-                            style: GoogleFonts.nunito(
-                              color: Colors.white,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ))
+                ),
+                SizedBox(
+                  height: 10,
+                )
               ],
             ),
-          ),
-          SizedBox(
-            height: 5,
-          ),
-          _buildShowCommentsButton(),
-          SizedBox(
-            height: 5,
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0),
-            child: Text(
-                _getTimeDifferenceFromNow(
-                    DateTime.parse(widget.post.created_at)),
-                style: GoogleFonts.nunito(
-                  color: Colors.white.withOpacity(0.5),
-                  fontSize: 10.0,
-                  fontWeight: FontWeight.w500,
-                )),
-          ),
-          SizedBox(
-            height: 10,
-          )
+          )),
         ],
       ),
-    ));
+    );
   }
 }
-
-

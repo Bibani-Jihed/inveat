@@ -40,7 +40,7 @@ class _SettingsState extends State<SettingsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   Container(
-                    padding: EdgeInsets.only(top: 60.0, left: 10.0),
+                    padding: EdgeInsets.only(top: 40.0, left: 12.0),
                     child: Column(
                       children: [
                         Container(
@@ -264,7 +264,7 @@ class _SettingsState extends State<SettingsScreen> {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 60.0),
+            padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 30.0),
             child:
              Row(
               children: [

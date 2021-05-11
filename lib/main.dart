@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:inveat/data/user_service.dart';
+import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/views/navigation_screen.dart';
 import 'package:inveat/views/welcome_screen.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +30,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: MColors.black
+    ));
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);

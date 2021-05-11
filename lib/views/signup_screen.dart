@@ -13,6 +13,7 @@ import 'package:inveat/utilities/constants/colors.dart';
 import 'package:inveat/views/login_screen.dart';
 import 'package:inveat/views/widgets/complete_profile_widget.dart';
 import 'package:liquid_swipe/liquid_swipe.dart';
+import 'package:toast/toast.dart';
 import 'navigation_screen.dart';
 
 class Signup extends StatefulWidget {
@@ -58,6 +59,9 @@ class _SignupState extends State<Signup> {
       setState(() {
         isFieldError=true;
       });
+      if(res_code==2) Toast.show("Email already exist", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+      else if(res_code==1) Toast.show("Error occurred, please try again", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+      else Toast.show("Error occurred, please try again", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
     }
 
   }

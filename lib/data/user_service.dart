@@ -15,17 +15,24 @@ Future<void>ConfigUser(response) async {
 }
 
 Future<int>Signup(Map<String, String> body) async {
-  final response= await HttpPost(body, Uri.parse(api.USER));
 
+  int emailNotSent=1;
+  int emailAlreadyExist=2;
+
+  final response= await HttpPost(body, Uri.parse(api.USER));
+  print(response.body);
   if (response.statusCode == 200) {
     ConfigUser(response);
+    return 200;
   } else {
-    //throw Exception('Failed to load');
+    if(response.body.contains("Adresse e-mail déjà existante")) return emailAlreadyExist;
+    if(response.body.contains("Email non envoyer")) return emailNotSent;
+    return response.statusCode;
   }
-  return response.statusCode;
 }
 Future<int>Login(Map<String, String> body) async {
   final response= await HttpPost(body, Uri.parse(api.LOGIN));
+  print(response.body);
   //Save User and token
   if (response.statusCode == 200) {
     ConfigUser(response);
@@ -57,6 +64,16 @@ Future<int> UploadUserImage(file) async {
     user.image_user =new ImageUser(url:bodyRes["data"]["url"],name:bodyRes["data"]["name"]);
     UpdateCurrentUser(json.encode(user));
   }
+  return response.statusCode;
+}
+Future<String>SendVerificationCode(Map<String, String> body)async{
+  final response= await HttpPost(body, Uri.parse(api.SEND_VERIFICATION_CODE));
+  print(response.body);
+  return response.body;
+}
+Future<int>ResetPassword(Map<String, String> body)async{
+  final response= await HttpPost(body, Uri.parse(api.RESET_PASSWORD));
+  print(response.body);
   return response.statusCode;
 }
 
