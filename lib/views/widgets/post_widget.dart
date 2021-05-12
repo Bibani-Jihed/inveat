@@ -268,11 +268,14 @@ class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
   }
 
   void _buildCommentsView(context) {
+
     showModalBottomSheet(
         backgroundColor: MColors.black,
         isScrollControlled: true,
         context: context,
-        builder: (context) => SafeArea(
+        builder: (context) => Container(
+          margin: EdgeInsets.only(top: MediaQuery.of(context).viewInsets.top),
+              height: MediaQuery.of(context).size.height-20,
               child: GestureDetector(
                 onTap: () {
                   FocusScope.of(context).requestFocus(new FocusNode());
@@ -287,7 +290,7 @@ class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
                       ],
                     ),
                     Container(
-                      height: 60.0,
+                      height: 50.0,
                       color: MColors.black,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -419,33 +422,39 @@ class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
     return FutureBuilder<User>(
         future: UserService.GetCurrentUser(),
         builder: (context, snapshot) {
-          if (snapshot.data.id == widget.post.user.id ||
-              snapshot.data.id == comment.user.id) {
-            return Slidable(
-              actionPane: SlidableDrawerActionPane(),
-              actionExtentRatio: 0.25,
-              child: _buildCommentMainItem(comment),
-              secondaryActions: <Widget>[
-                IconSlideAction(
-                  caption: 'Delete',
-                  color: Colors.red,
-                  icon: Icons.delete,
-                  onTap: () async {
-                    final res_code =
-                        await PostService.RemoveComment(comment.id);
-                    if (res_code == 201) {
-                      setState(() {
-                        widget.post.comments = List.from(widget.post.comments)
-                          ..removeAt(index);
-                      });
-                      Navigator.of(context).pop();
-                    }
-                  },
-                ),
-              ],
-            );
-          } else {
-            _buildCommentMainItem(comment);
+          print("isNull"+(snapshot.data==null).toString());
+          if(snapshot.data!=null) {
+            if (snapshot.data.id == widget.post.user.id ||
+                snapshot.data.id == comment.user.id) {
+              return Slidable(
+                actionPane: SlidableDrawerActionPane(),
+                actionExtentRatio: 0.25,
+                child: _buildCommentMainItem(comment),
+                secondaryActions: <Widget>[
+                  IconSlideAction(
+                    caption: 'Delete',
+                    color: Colors.red,
+                    icon: Icons.delete,
+                    onTap: () async {
+                      final res_code =
+                      await PostService.RemoveComment(comment.id);
+                      if (res_code == 201) {
+                        setState(() {
+                          widget.post.comments = List.from(widget.post.comments)
+                            ..removeAt(index);
+                        });
+                        Navigator.of(context).pop();
+                      }
+                    },
+                  ),
+                ],
+              );
+            } else {
+              return _buildCommentMainItem(comment);
+            }
+          }
+          else{
+            return Container();
           }
         });
   }
@@ -460,6 +469,7 @@ class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
 
   Future<bool> onLikeButtonTapped(bool isLiked) async {
     await PostService.LikeOrDislike(widget.post.id);
+
     return !isLiked;
   }
 
@@ -504,8 +514,7 @@ class _PostWidgetState extends State<PostWidget> with TickerProviderStateMixin {
                               errorWidget: (context, url, error) =>
                                   Icon(Icons.error),
                             ),
-                            zoomedBackgroundColor:
-                            Color.fromRGBO(240, 240, 240, 1.0),
+                            zoomedBackgroundColor:MColors.black,
                             hideStatusBarWhileZooming: true,
                             onZoomStart: () {
                               print('Zoom started');

@@ -42,15 +42,11 @@ class _PostSelectionState extends State<PostSelection> {
   bool isTitleError=false;
   bool isCaptionError=false;
   bool isAddressLoaded=false;
+  bool isAddressNotAllowed=false;
   int items_number=12;
 
 
   void SharePost(files) async {
-
-
-      print(_address.toJson());
-      print(_caption);
-      print(_title);
       if (_caption == null || _caption.isEmpty) {
         setState(() {
           isCaptionError = true;
@@ -63,13 +59,14 @@ class _PostSelectionState extends State<PostSelection> {
       }
       else {
         EasyLoading.show(status: 'loading...');
-        print(_address.toJson());
         Map<String, dynamic> form = {
           'content': _caption,
           'title': _title,
           'type': 'image',
-          'address': _address.toJson(),
         };
+        if(_address!=null){
+          form["address"]=_address.toJson();
+        }
 
         final post_res =await PostService.AddPost(files, form);
         EasyLoading.dismiss();
@@ -169,6 +166,11 @@ class _PostSelectionState extends State<PostSelection> {
           isAddressLoaded = true;
         });
       }
+      else {
+        setState(() {
+          isAddressNotAllowed=true;
+        });
+      }
     }
     return _address;
   }
@@ -195,13 +197,13 @@ class _PostSelectionState extends State<PostSelection> {
                 child: Text(
                   'Share',
                   style: GoogleFonts.nunito(
-                    color: isAddressLoaded?Colors.white:Colors.white.withOpacity(0.1),
+                    color: Colors.white,
                     fontSize: 20.0,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
                 onPressed: () {
-                  if(isAddressLoaded)
+                  if(isAddressLoaded || isAddressNotAllowed)
                     {
                       SharePost(widget.files);
 
@@ -390,11 +392,11 @@ class _PostSelectionState extends State<PostSelection> {
                       Expanded(
                           flex: 6,
                           child: Text(
-                            _address!=null?_address.city+","+_address.governerate+","+_address.country:"loading...",
+                            _address!=null?_address.city+","+_address.governerate+","+_address.country: isAddressNotAllowed?"Couldn't retreive location...":"loading...",
                             textAlign: TextAlign.start,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.nunito(
-                              color: Colors.white,
+                              color: isAddressNotAllowed?Colors.red:Colors.white,
                               fontSize: 15.0,
                               fontWeight: FontWeight.w800,
                             ),

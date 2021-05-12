@@ -36,6 +36,7 @@ Future<int> AddPost(selectedItems,Map<String, dynamic> body) async {
   request.fields['type']=body['type'];
   request.fields['address']=jsonEncode(body['address']);
   http.Response response = await http.Response.fromStream(await request.send());
+  print(response.body);
   if(response.body=="Unauthorized"){
     return -1;
   }

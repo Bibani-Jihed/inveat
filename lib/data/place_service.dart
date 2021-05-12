@@ -47,31 +47,35 @@ Future<Position> _getPosition() async {
 }
 
 Future<AddressPost.Address> GetAddress() async {
-  Position position = await _getPosition();
-  final coordinates = new Coordinates(position.latitude, position.longitude);
-  var addresses =
-      await Geocoder.local.findAddressesFromCoordinates(coordinates);
-  var first = addresses.first;
-  print("${first.featureName}");
-  print("featureName: " + first.featureName);
-  print("addressLine: " + first.addressLine);
-  print("adminArea: " + first.adminArea);
-  print("countryName: " + first.countryName);
-  print("locality: " + first.locality);
-  print("thoroughfare: " + first.thoroughfare);
-  print("subAdminArea: " + first.subAdminArea);
-  print("longitude: " + position.longitude.toString());
-  print("latitude: " + position.latitude.toString());
-  final address = new AddressPost.Address(
-      city: first.locality,
-      country: first.countryName,
-      governerate: first.adminArea,
-      street_number: first.featureName,
-      street: first.thoroughfare,
-      zip_code: first.postalCode,
-      latitude: position.latitude,
-      longitude: position.longitude);
-  return address;
+  try {
+    Position position = await _getPosition();
+    final coordinates = new Coordinates(position.latitude, position.longitude);
+    var addresses =
+    await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var first = addresses.first;
+    print("${first.featureName}");
+    print("featureName: " + first.featureName);
+    print("addressLine: " + first.addressLine);
+    print("adminArea: " + first.adminArea);
+    print("countryName: " + first.countryName);
+    print("locality: " + first.locality);
+    print("thoroughfare: " + first.thoroughfare);
+    print("subAdminArea: " + first.subAdminArea);
+    print("longitude: " + position.longitude.toString());
+    print("latitude: " + position.latitude.toString());
+    final address = new AddressPost.Address(
+        city: first.locality,
+        country: first.countryName,
+        governerate: first.adminArea,
+        street_number: first.featureName,
+        street: first.thoroughfare,
+        zip_code: first.postalCode,
+        latitude: position.latitude,
+        longitude: position.longitude);
+    return address;
+  }catch(e){
+    return null;
+  }
 }
 
 Future<Map<String, String>> GetInfoForNearbyPosts() async {
